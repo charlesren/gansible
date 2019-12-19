@@ -9,7 +9,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func connect(user, password, host, key string, port int, cipherList []string) (*ssh.Session, error) {
+// Connect func
+func Connect(user, password, host, key string, port int, cipherList []string) (*ssh.Session, error) {
 	var (
 		auth         []ssh.AuthMethod
 		addr         string
