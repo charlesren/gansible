@@ -1,17 +1,13 @@
-package main
+package autologin
+
 import (
-	"bytes"
 	"fmt"
-	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"net"
-	"path/filepath"
-	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh"
 )
-var password []string
-host := os.Args[1] 
-user := root
 
 func connect(user, password, host, key string, port int, cipherList []string) (*ssh.Session, error) {
 	var (
