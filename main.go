@@ -23,7 +23,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer session.Close()
-	cmd := "date >> /tmp/1"
-	session.Run(cmd)
+	cmd := "date >>/tmp/1"
+	session.CombinedOutput(cmd)
 	fmt.Println("end")
 }
