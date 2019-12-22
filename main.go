@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fmt.Println("hello")
-	passwords := []string{"zzb11zzb"}
+	passwords := []string{"passw0rd"}
 	var client *ssh.Client
 	var err error
 	for _, password := range passwords {
