@@ -13,8 +13,7 @@ func main() {
 	var client *ssh.Client
 	var err error
 	for _, password := range passwords {
-		if cli, err := autologin.Connect("root", password, "127.0.0.1", 22); err == nil {
-			client = cli
+		if client, err = autologin.Connect("root", password, "127.0.0.1", 22); err == nil {
 			break
 		}
 	}
