@@ -15,7 +15,6 @@ func Connect(user string, password string, host string, port int) (*ssh.Client, 
 		clientConfig *ssh.ClientConfig
 		client       *ssh.Client
 		config       ssh.Config
-		session      *ssh.Session
 		err          error
 	)
 	// get auth method
