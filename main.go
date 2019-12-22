@@ -8,7 +8,7 @@ import (
 
 func main() {
 	fmt.Println("hello")
-	client, err := autologin.Connect("rencc", "zzb11zzb", "127.0.0.1",  22)
+	client, err := autologin.Connect("root", "zzb11zzb", "127.0.0.1",  22)
 	if err != nil {
 		log.Fatal(err)
 	}
