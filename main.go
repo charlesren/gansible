@@ -24,13 +24,15 @@ func main() {
 	}
 	defer session.Close()
 	/*
-		cmd := "date"
-		out, err := session.CombinedOutput(cmd)
-		if err != nil {
-			log.Fatal("Remote Exec Field:", err)
-		}
-		fmt.Println("Remote Exec Output:\n", string(out))
+		    //Exec cmd then quit
+			cmd := "date"
+			out, err := session.CombinedOutput(cmd)
+			if err != nil {
+				log.Fatal("Remote Exec Field:", err)
+			}
+			fmt.Println("Remote Exec Output:\n", string(out))
 	*/
+	//Start shell on remote host then interactive
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
 	session.Stdin = os.Stdin
