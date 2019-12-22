@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-	fmt.Println("hello")
 	passwords := []string{"abc", "passw0rd"}
 	var client *ssh.Client
 	var err error
@@ -23,7 +22,10 @@ func main() {
 		log.Fatal(err)
 	}
 	defer session.Close()
-	cmd := "date >>/tmp/1"
-	session.CombinedOutput(cmd)
-	fmt.Println("end")
+	cmd := "date"
+	out, err := session.CombinedOutput(cmd)
+	if err != nil {
+		log.Fatal("Exec Field:", err)
+	}
+	fmt.Println("Output:", string(out))
 }
