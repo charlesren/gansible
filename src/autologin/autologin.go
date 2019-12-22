@@ -2,15 +2,13 @@ package autologin
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"time"
-
 	"golang.org/x/crypto/ssh"
 )
 
 // Connect func
-func Connect(user, password, host, key string, port int, cipherList []string) (*ssh.Session, error) {
+func Connect(user string, password string, host string, port int) (*ssh.Session, error) {
 	var (
 		auth         []ssh.AuthMethod
 		addr         string
@@ -22,36 +20,7 @@ func Connect(user, password, host, key string, port int, cipherList []string) (*
 	)
 	// get auth method
 	auth = make([]ssh.AuthMethod, 0)
-	if key == "" {
-		auth = append(auth, ssh.Password(password))
-	} else {
-		pemBytes, err := ioutil.ReadFile(key)
-		if err != nil {
-			return nil, err
-		}
-
-		var signer ssh.Signer
-		if password == "" {
-			signer, err = ssh.ParsePrivateKey(pemBytes)
-		} else {
-			signer, err = ssh.ParsePrivateKeyWithPassphrase(pemBytes, []byte(password))
-		}
-		if err != nil {
-			return nil, err
-		}
-		auth = append(auth, ssh.PublicKeys(signer))
-	}
-
-	if len(cipherList) == 0 {
-		config = ssh.Config{
-			Ciphers: []string{"aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-gcm@openssh.com", "arcfour256", "arcfour128", "aes128-cbc", "3des-cbc", "aes192-cbc", "aes256-cbc"},
-		}
-	} else {
-		config = ssh.Config{
-			Ciphers: cipherList,
-		}
-	}
-
+	auth = append(auth, ssh.Password(password))
 	clientConfig = &ssh.ClientConfig{
 		User:    user,
 		Auth:    auth,
