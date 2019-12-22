@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fmt.Println("hello")
-	passwords := []string{"passw0rd"}
+	passwords := []string{"abc", "passw0rd"}
 	var client *ssh.Client
 	var err error
 	for _, password := range passwords {
@@ -24,7 +24,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer session.Close()
-	cmd := "touch /tmp/1"
+	cmd := "date >> /tmp/1"
 	session.Run(cmd)
 	fmt.Println("end")
 }

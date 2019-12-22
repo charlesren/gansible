@@ -2,9 +2,9 @@ package autologin
 
 import (
 	"fmt"
+	"golang.org/x/crypto/ssh"
 	"net"
 	"time"
-	"golang.org/x/crypto/ssh"
 )
 
 // Connect func
@@ -17,7 +17,6 @@ func Connect(user string, password string, host string, port int) (*ssh.Client, 
 		config       ssh.Config
 		err          error
 	)
-	// get auth method
 	auth = make([]ssh.AuthMethod, 0)
 	auth = append(auth, ssh.Password(password))
 	clientConfig = &ssh.ClientConfig{
@@ -29,10 +28,7 @@ func Connect(user string, password string, host string, port int) (*ssh.Client, 
 			return nil
 		},
 	}
-
-	// connet to ssh
 	addr = fmt.Sprintf("%s:%d", host, port)
-
 	if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
 		return nil, err
 	}
