@@ -8,8 +8,7 @@ import (
 
 func main() {
 	fmt.Println("hello")
-	chiperList := []string{}
-	client, err := autologin.Connect("rencc", "zzb11zzb", "127.0.0.1", "", 22, chiperList)
+	client, err := autologin.Connect("rencc", "zzb11zzb", "127.0.0.1",  22)
 	if err != nil {
 		log.Fatal(err)
 	}
