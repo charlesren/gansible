@@ -25,7 +25,7 @@ func main() {
 	cmd := "date"
 	out, err := session.CombinedOutput(cmd)
 	if err != nil {
-		log.Fatal("Exec Field:", err)
+		log.Fatal("Remote Exec Field:", err)
 	}
-	fmt.Println("Output:", string(out))
+	fmt.Println("Remote Exec Output:\n", string(out))
 }
