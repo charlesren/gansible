@@ -36,13 +36,15 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("shell called")
+		host := args[0]
+		fmt.Println("Host:", host)
 		passwords := []string{"abc", "passw0rd"}
 		var client *ssh.Client
 		var err error
 		for _, password := range passwords {
-			if client, err = autologin.Connect("root", password, "127.0.0.1", 22); err == nil {
+			if client, err = autologin.Connect("root", password, host, 22); err == nil {
 				break
 			}
 		}
