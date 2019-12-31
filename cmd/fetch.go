@@ -91,6 +91,6 @@ func init() {
 	// fetchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	fetchCmd.Flags().StringVarP(&src, "src", "s", "", "Source file or directory")
 	fetchCmd.MarkFlagRequired("src")
-	fetchCmd.Flags().StringVarP(&dest, "dest", "s", "", "Destination file or directory")
+	fetchCmd.Flags().StringVarP(&dest, "dest", "d", "", "Destination file or directory")
 	fetchCmd.MarkFlagRequired("dest")
 }
