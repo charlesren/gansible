@@ -101,5 +101,7 @@ func init() {
 	// is called directly, e.g.:
 	// copyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	copyCmd.Flags().StringVarP(&src, "src", "s", "", "Source file or directory")
+	copyCmd.MarkFlagRequired("src")
 	copyCmd.Flags().StringVarP(&dest, "dest", "d", "", "Destination file or directory")
+	copyCmd.MarkFlagRequired("dest")
 }

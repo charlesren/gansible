@@ -18,9 +18,18 @@ package cmd
 
 import (
 	"fmt"
+	"gansible/src/autologin"
+	"log"
+	"os"
+	"path"
 
+	"github.com/pkg/sftp"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh"
 )
+
+var src string
+var dest string
 
 // fetchCmd represents the fetch command
 var fetchCmd = &cobra.Command{
@@ -34,6 +43,40 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("fetch called")
+		host := args[0]
+		fmt.Println("Host:", host)
+		passwords := []string{"abc", "passw0rd"}
+		var client *ssh.Client
+		var err error
+		for _, password := range passwords {
+			if client, err = autologin.Connect("root", password, host, 22); err == nil {
+				break
+			}
+		}
+		defer client.Close()
+		var sftpClient *sftp.Client
+		sftpClient, err = sftp.NewClient(client)
+		if err != nil {
+			log.Fatal(err)
+		}
+		srcFile, err := sftpClient.Open(src)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer srcFile.Close()
+
+		var destFile = path.Base(srcFile)
+		dstFile, err := os.Create(path.Join(dest, destFile))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer dstFile.Close()
+
+		if _, err = srcFile.WriteTo(dstFile); err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println("copy file from remote server finished!")
 	},
 }
 
@@ -49,4 +92,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// fetchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	copyCmd.Flags().StringVarP(&src, "src", "s", "", "Source file or directory")
+	copyCmd.Flags().StringVarP(&dest, "dest", "s", "", "Destination file or directory")
 }
