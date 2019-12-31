@@ -28,9 +28,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-var src string
-var dest string
-
 // fetchCmd represents the fetch command
 var fetchCmd = &cobra.Command{
 	Use:   "fetch",
@@ -65,14 +62,14 @@ to quickly create a Cobra application.`,
 		}
 		defer srcFile.Close()
 
-		var destFile = path.Base(srcFile)
-		dstFile, err := os.Create(path.Join(dest, destFile))
+		var destFileName = path.Base(src)
+		destFile, err := os.Create(path.Join(dest, destFileName))
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer dstFile.Close()
+		defer destFile.Close()
 
-		if _, err = srcFile.WriteTo(dstFile); err != nil {
+		if _, err = srcFile.WriteTo(destFile); err != nil {
 			log.Fatal(err)
 		}
 

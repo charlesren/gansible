@@ -66,14 +66,14 @@ to quickly create a Cobra application.`,
 
 		}
 		defer srcFile.Close()
-		var destFile = path.Base(src)
-		dstFile, err := sftpClient.Create(path.Join(dest, destFile))
+		var destFileName = path.Base(src)
+		destFile, err := sftpClient.Create(path.Join(dest, destFileName))
 		if err != nil {
-			fmt.Println("sftpClient.Create error : ", path.Join(dest, destFile))
+			fmt.Println("sftpClient.Create error : ", path.Join(dest, destFileName))
 			log.Fatal(err)
 
 		}
-		defer dstFile.Close()
+		defer destFile.Close()
 
 		buf := make([]byte, 1024)
 		for {
@@ -81,7 +81,7 @@ to quickly create a Cobra application.`,
 			if n == 0 {
 				break
 			}
-			dstFile.Write(buf)
+			destFile.Write(buf)
 		}
 
 		fmt.Println("copy file to remote server finished!")
