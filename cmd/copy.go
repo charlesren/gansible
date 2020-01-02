@@ -18,7 +18,7 @@ package cmd
 
 import (
 	"fmt"
-	"gansible/src/autologin"
+	"gansible/pkg/autologin"
 	"log"
 	"os"
 	"path"
