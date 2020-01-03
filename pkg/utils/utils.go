@@ -22,9 +22,15 @@ type Result struct {
 //RunResult struct store cmd run result of ssh session
 type RunResult struct {
 	Host       string
-	RetrunCode string
 	Status     string
+	RetrunCode string
 	Result     string
+}
+
+//RunInfo gengrate information of cmd result executed by ssh session
+func RunInfo(runr RunResult) string {
+	runInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s\n\n", runr.Host, runr.Status, runr.RetrunCode, runr.Result)
+	return runInfo
 }
 
 // AppendToFile will print any string of text to a file safely by
