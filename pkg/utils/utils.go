@@ -10,13 +10,13 @@ import (
 //Result struct store execute result of gansible command
 type Result struct {
 	StartTime        time.Time
+	EndTime          time.Time
+	CostTime         time.Duration
 	SuccessHosts     []interface{}
 	FailedHosts      []interface{}
 	UnreachableHosts []interface{}
 	SkipedHosts      []interface{}
 	TotalHosts       []interface{}
-	EndTime          time.Time
-	CostTime         time.Duration
 }
 
 // AppendToFile will print any string of text to a file safely by
