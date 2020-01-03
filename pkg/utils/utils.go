@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-//Result struct store execute result of gansible command
-type Result struct {
+//SumResult struct store execute summary result of gansible command
+type SumResult struct {
 	StartTime        time.Time
 	EndTime          time.Time
 	CostTime         time.Duration
@@ -48,14 +48,13 @@ func AppendToFile(file string, str string) error {
 	return f.Sync()
 }
 
-//EndInfo gengrate summary of gansible result
-func EndInfo(result Result, startTime time.Time) string {
-	//result.StartTime = startTime.Format("2006-01-02 15:04:05")
-	result.EndTime = time.Now()
-	result.CostTime = result.EndTime.Sub(startTime)
-	endTimeStr := result.EndTime.Format("2006-01-02 15:04:05")
-	costTimeStr := result.CostTime.String()
-	totalHostsNum := len(result.FailedHosts) + len(result.SuccessHosts) + len(result.UnreachableHosts) + len(result.SkipedHosts)
-	summary := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d", endTimeStr, costTimeStr, totalHostsNum, len(result.SuccessHosts), len(result.FailedHosts), len(result.UnreachableHosts), len(result.SkipedHosts))
-	return summary
+//SumInfo gengrate summary of gansible result
+func SumInfo(sumr SumResult, startTime time.Time) string {
+	sumr.EndTime = time.Now()
+	sumr.CostTime = sumr.EndTime.Sub(startTime)
+	endTimeStr := sumr.EndTime.Format("2006-01-02 15:04:05")
+	costTimeStr := sumr.CostTime.String()
+	totalHostsNum := len(sumr.FailedHosts) + len(sumr.SuccessHosts) + len(sumr.UnreachableHosts) + len(sumr.SkipedHosts)
+	sumi := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d", endTimeStr, costTimeStr, totalHostsNum, len(sumr.SuccessHosts), len(sumr.FailedHosts), len(sumr.UnreachableHosts), len(sumr.SkipedHosts))
+	return sumi
 }
