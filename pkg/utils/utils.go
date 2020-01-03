@@ -30,14 +30,13 @@ func AppendToFile(file string, str string) error {
 	}
 	return f.Sync()
 }
+
+//EndInfo gengrate summary of gansible result
 func EndInfo(result Result, startTime time.Time) string {
 	endTime := time.Now()
-	result.StartTime = startTime.Format("2006-01-02 15:04:05")
-	result.EndTime = endTime.Format("2006-01-02 15:04:05")
+	//result.StartTime = startTime.Format("2006-01-02 15:04:05")
+	//result.EndTime = endTime.Format("2006-01-02 15:04:05")
 	result.CostTime = endTime.Sub(startTime).String()
-	TotalHostsInfo := fmt.Sprintf("%d(Success) + %d(Failed) = %d(Total)", len(result.SuccessHosts), len(result.FailedHosts), len(result.SuccessHosts)+len(result.FailedHosts))
-	fmt.Sprintf("Tips: process running done.")
-	fmt.Sprintf("Start Time: %s\nEnd Time: %s\nCost Time: %s\nTotal Hosts Running: %s\n", result.StartTime, result.EndTime, result.CostTime, TotalHostsInfo)
-	tips := fmt.Sprintf("df")
-	return tips
+	summary := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d", result.EndTime, result.CostTime, len(result.SuccessHosts)+len(result.FailedHosts), len(result.SuccessHosts), len(result.FailedHosts))
+	return summary
 }
