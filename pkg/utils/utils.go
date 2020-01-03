@@ -19,6 +19,14 @@ type Result struct {
 	TotalHosts       []interface{}
 }
 
+//RunResult struct store cmd run result of ssh session
+type RunResult struct {
+	Host       string
+	RetrunCode string
+	Status     string
+	Result     string
+}
+
 // AppendToFile will print any string of text to a file safely by
 // checking for errors and syncing at the end.
 func AppendToFile(file string, str string) error {
