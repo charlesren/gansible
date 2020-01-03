@@ -9,11 +9,14 @@ import (
 
 //Result struct store execute result of gansible command
 type Result struct {
-	StartTime    string
-	SuccessHosts []interface{}
-	FailedHosts  []interface{}
-	EndTime      string
-	CostTime     string
+	StartTime        time.Time
+	SuccessHosts     []interface{}
+	FailedHosts      []interface{}
+	UnreachableHosts []interface{}
+	SkipedHosts      []interface{}
+	TotalHosts       []interface{}
+	EndTime          time.Time
+	CostTime         time.Duration
 }
 
 // AppendToFile will print any string of text to a file safely by
@@ -33,10 +36,12 @@ func AppendToFile(file string, str string) error {
 
 //EndInfo gengrate summary of gansible result
 func EndInfo(result Result, startTime time.Time) string {
-	endTime := time.Now()
 	//result.StartTime = startTime.Format("2006-01-02 15:04:05")
-	//result.EndTime = endTime.Format("2006-01-02 15:04:05")
-	result.CostTime = endTime.Sub(startTime).String()
-	summary := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d", result.EndTime, result.CostTime, len(result.SuccessHosts)+len(result.FailedHosts), len(result.SuccessHosts), len(result.FailedHosts))
+	result.EndTime = time.Now()
+	result.CostTime = result.EndTime.Sub(startTime)
+	endTimeStr := result.EndTime.Format("2006-01-02 15:04:05")
+	costTimeStr := result.CostTime.String()
+	totalHostsNum := len(result.FailedHosts) + len(result.SuccessHosts) + len(result.UnreachableHosts) + len(result.SkipedHosts)
+	summary := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d", endTimeStr, costTimeStr, totalHostsNum, len(result.SuccessHosts), len(result.FailedHosts), len(result.UnreachableHosts), len(result.SkipedHosts))
 	return summary
 }
