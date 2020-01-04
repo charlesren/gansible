@@ -41,9 +41,8 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run called")
 		host := args[0]
-		fmt.Println("Host:", host)
+		fmt.Printf("%s >>\n", host)
 		passwords := []string{"abc", "passw0rd"}
 		var client *ssh.Client
 		var err error
@@ -66,7 +65,7 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			log.Fatal("Remote Exec Field:", err)
 		}
-		fmt.Println("Remote Exec Output:\n", string(out))
+		fmt.Printf("%s", string(out))
 	},
 }
 
