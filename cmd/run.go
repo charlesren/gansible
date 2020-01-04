@@ -19,12 +19,15 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"gansible/pkg/autologin"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
 )
+
+var commands string
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -56,8 +59,9 @@ to quickly create a Cobra application.`,
 		}
 		defer session.Close()
 		//Exec cmd then quit
-		command := "date"
-		out, err := session.CombinedOutput(command)
+		command := strings.Split(commands, ";")
+		cmdNew := strings.Join(command, "&&")
+		out, err := session.CombinedOutput(cmdNew)
 		if err != nil {
 			log.Fatal("Remote Exec Field:", err)
 		}
@@ -77,4 +81,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	runCmd.Flags().StringVarP(&commands, "commands", "c", "", "separate multiple command with semicolons. (Example:  pwd;ls)")
+	runCmd.MarkFlagRequired("commands")
 }
