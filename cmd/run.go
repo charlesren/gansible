@@ -1,3 +1,4 @@
+//Package cmd ...
 /*
 Copyright © 2020 NAME HERE <EMAIL ADDRESS>
 
@@ -17,8 +18,12 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+
+	"gansible/pkg/autologin"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh"
 )
 
 // runCmd represents the run command
@@ -33,6 +38,29 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("run called")
+		host := args[0]
+		fmt.Println("Host:", host)
+		passwords := []string{"abc", "passw0rd"}
+		var client *ssh.Client
+		var err error
+		for _, password := range passwords {
+			if client, err = autologin.Connect("root", password, host, 22); err == nil {
+				break
+			}
+		}
+		defer client.Close()
+		session, err := client.NewSession()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer session.Close()
+		//Exec cmd then quit
+		command := "date"
+		out, err := session.CombinedOutput(command)
+		if err != nil {
+			log.Fatal("Remote Exec Field:", err)
+		}
+		fmt.Println("Remote Exec Output:\n", string(out))
 	},
 }
 
