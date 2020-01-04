@@ -9,14 +9,14 @@ import (
 
 //SumResult struct store execute summary result of gansible command
 type SumResult struct {
-	StartTime        time.Time
-	EndTime          time.Time
-	CostTime         time.Duration
-	SuccessHosts     []interface{}
-	FailedHosts      []interface{}
-	UnreachableHosts []interface{}
-	SkipedHosts      []interface{}
-	TotalHosts       []interface{}
+	StartTime   time.Time
+	EndTime     time.Time
+	CostTime    time.Duration
+	Success     []interface{}
+	Failed      []interface{}
+	Unreachable []interface{}
+	Skiped      []interface{}
+	TotalHosts  []interface{}
 }
 
 //RunResult struct store cmd run result of ssh session
@@ -54,7 +54,7 @@ func SumInfo(sumr SumResult, startTime time.Time) string {
 	sumr.CostTime = sumr.EndTime.Sub(startTime)
 	endTimeStr := sumr.EndTime.Format("2006-01-02 15:04:05")
 	costTimeStr := sumr.CostTime.String()
-	totalHostsNum := len(sumr.FailedHosts) + len(sumr.SuccessHosts) + len(sumr.UnreachableHosts) + len(sumr.SkipedHosts)
-	sumi := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d", endTimeStr, costTimeStr, totalHostsNum, len(sumr.SuccessHosts), len(sumr.FailedHosts), len(sumr.UnreachableHosts), len(sumr.SkipedHosts))
+	totalNum := len(sumr.Failed) + len(sumr.Success) + len(sumr.Unreachable) + len(sumr.Skiped)
+	sumi := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d", endTimeStr, costTimeStr, totalNum, len(sumr.Success), len(sumr.Failed), len(sumr.Unreachable), len(sumr.Skiped))
 	return sumi
 }
