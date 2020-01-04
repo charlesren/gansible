@@ -59,6 +59,7 @@ to quickly create a Cobra application.`,
 		}
 		defer session.Close()
 		//Exec cmd then quit
+		commands = strings.TrimRight(commands, ";")
 		command := strings.Split(commands, ";")
 		cmdNew := strings.Join(command, "&&")
 		out, err := session.CombinedOutput(cmdNew)
