@@ -16,7 +16,6 @@ type SumResult struct {
 	Failed      []interface{}
 	Unreachable []interface{}
 	Skiped      []interface{}
-	TotalHosts  []interface{}
 }
 
 //RunResult struct store cmd run result of ssh session
