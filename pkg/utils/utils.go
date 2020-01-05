@@ -3,7 +3,10 @@ package utils
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -56,4 +59,106 @@ func SumInfo(sumr SumResult, startTime time.Time) string {
 	totalNum := len(sumr.Failed) + len(sumr.Success) + len(sumr.Unreachable) + len(sumr.Skiped)
 	sumi := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d", endTimeStr, costTimeStr, totalNum, len(sumr.Success), len(sumr.Failed), len(sumr.Unreachable), len(sumr.Skiped))
 	return sumi
+}
+
+//ParseIPStr parse  given string then store proper ips into []sting
+func ParseIPStr(ipStr string) ([]string, error) {
+	var IP []string
+	ipStr = strings.TrimSpace(ipStr)
+	if strings.HasPrefix(ipStr, "#") {
+		return IP, nil
+	}
+	ipStr = strings.TrimRight(ipStr, ";")
+	fields := strings.Split(ipStr, ";")
+	for _, field := range fields {
+		if strings.Contains(field, "-") {
+			f := strings.Split(field, "-")
+			startIP := f[0]
+			if net.ParseIP(startIP) == nil {
+				return IP, fmt.Errorf("Illegal IP range,Plesae check")
+			}
+			startIPBlock := strings.Split(startIP, ".")
+			startIPPrefix := startIPBlock[0 : len(startIPBlock)-1]
+			startIPLastNo, _ := strconv.Atoi(startIPBlock[len(startIPBlock)-1])
+			end := f[1]
+			// dValue is d-dalue between startIPLastNo and endIPLastNo
+			var dValue int
+			if net.ParseIP(end) != nil {
+				// string after - is IP
+				endIPBlock := strings.Split(end, ".")
+				endIPPrefix := endIPBlock[0 : len(endIPBlock)-1]
+				endIPLastNo, _ := strconv.Atoi(endIPBlock[len(endIPBlock)-1])
+				for i := 0; i < len(startIPPrefix); i++ {
+					if startIPPrefix[i] != endIPPrefix[i] {
+						return IP, fmt.Errorf("Illegal IP range,Plesae check")
+					}
+				}
+				dValue = endIPLastNo - startIPLastNo
+			} else {
+				// string after - should be a number
+				endIPLastNo, err := strconv.Atoi(end)
+				if err != nil {
+					return IP, fmt.Errorf("Illegal IP range,Plesae check")
+				}
+				dValue = endIPLastNo - startIPLastNo
+			}
+			switch {
+			case dValue < 0:
+				return IP, fmt.Errorf("Illegal IP range,Plesae check")
+			case dValue == 0:
+				IP = append(IP, startIP)
+				return IP, nil
+			case dValue > 0:
+				for i := 0; i <= dValue; i++ {
+					newIPBlock := append(startIPPrefix, strconv.Itoa(startIPLastNo+i))
+					newIP := strings.Join(newIPBlock, ".")
+					IP = append(IP, newIP)
+				}
+				return IP, nil
+			}
+		} else if strings.Contains(field, "/") {
+			splitted := strings.Split(field, "/")
+			if net.ParseIP(splitted[0]) == nil {
+				return IP, fmt.Errorf("Illegal IP range,Plesae check")
+			}
+			//convert netmask style to cidr
+			if strings.Contains(splitted[1], ".") {
+				maskBlock := strings.Split(splitted[1], ".")
+				ones, _ := net.IPv4Mask([]byte(maskBlock[0])[0], []byte(maskBlock[1])[0], []byte(maskBlock[2])[0], []byte(maskBlock[3])[0]).Size()
+				splitted[1] = strconv.Itoa(ones)
+				field = strings.Join(splitted, "/")
+			}
+			if splitted[1] == "32" {
+				return []string{splitted[0]}, nil
+			}
+			ip, ipnet, err := net.ParseCIDR(field)
+			if err != nil {
+				return nil, err
+			}
+
+			for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
+				IP = append(IP, ip.String())
+			}
+			// remove network address and broadcast address
+			return IP[1 : len(IP)-1], nil
+		} else {
+			ip := net.ParseIP(field)
+			if ip == nil {
+				return IP, fmt.Errorf("Illegal IP range,Plesae check")
+			}
+			IP = append(IP, ip.String())
+			return IP, nil
+		}
+	}
+
+	return IP, nil
+}
+
+func inc(ip net.IP) {
+	for j := len(ip) - 1; j >= 0; j-- {
+		ip[j]++
+		if ip[j] > 0 {
+			break
+		}
+	}
 }
