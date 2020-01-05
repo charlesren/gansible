@@ -28,7 +28,7 @@ type RunResult struct {
 
 //RunInfo gengrate information of cmd result executed by ssh session
 func RunInfo(runr RunResult) string {
-	runInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s\n\n", runr.Host, runr.Status, runr.RetrunCode, runr.Result)
+	runInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s", runr.Host, runr.Status, runr.RetrunCode, runr.Result)
 	return runInfo
 }
 

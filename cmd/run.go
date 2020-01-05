@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"gansible/pkg/autologin"
+	"gansible/pkg/utils"
 
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
@@ -41,13 +42,13 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		host := args[0]
-		fmt.Printf("%s >>\n", host)
+		runr := utils.RunResult{}
+		runr.Host = args[0]
 		passwords := []string{"abc", "passw0rd"}
 		var client *ssh.Client
 		var err error
 		for _, password := range passwords {
-			if client, err = autologin.Connect("root", password, host, 22); err == nil {
+			if client, err = autologin.Connect("root", password, runr.Host, 22); err == nil {
 				break
 			}
 		}
@@ -63,9 +64,14 @@ to quickly create a Cobra application.`,
 		cmdNew := strings.Join(command, "&&")
 		out, err := session.CombinedOutput(cmdNew)
 		if err != nil {
-			log.Fatal("Remote Exec Field:", err)
+			runr.Status = "Failed"
+			runr.RetrunCode = "1"
 		}
-		fmt.Printf("%s", string(out))
+		runr.Status = "Success"
+		runr.RetrunCode = "0"
+		runr.Result = string(out)
+		runinfo := utils.RunInfo(runr)
+		fmt.Println(runinfo)
 	},
 }
 
