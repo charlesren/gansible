@@ -72,4 +72,5 @@ func init() {
 	runCmd.Flags().StringVarP(&commands, "commands", "c", "", "separate multiple command with semicolons(eg: pwd;ls)")
 	runCmd.Flags().StringVarP(&hosts, "hosts", "H", "", "support style like 10.0.0.1;10.1.1.1-3;10.2.2.2-10.2.2.5;10.3.3.1/31")
 	runCmd.MarkFlagRequired("commands")
+	runCmd.MarkFlagRequired("hosts")
 }
