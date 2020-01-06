@@ -2,12 +2,15 @@ package utils
 
 import (
 	"fmt"
+	"gansible/pkg/autologin"
 	"log"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh"
 )
 
 //SumResult struct store execute summary result of gansible command
@@ -65,6 +68,9 @@ func SumInfo(sumr SumResult, startTime time.Time) string {
 func ParseIPStr(ipStr string) ([]string, error) {
 	var IP []string
 	ipStr = strings.TrimSpace(ipStr)
+	if ipStr == "" {
+		return IP, nil
+	}
 	if strings.HasPrefix(ipStr, "#") {
 		return IP, nil
 	}
@@ -161,4 +167,37 @@ func inc(ip net.IP) {
 			break
 		}
 	}
+}
+
+//DoCommand open a ssh session on a given host and run given commands  then return result
+func DoCommand(host string, commands string) RunResult {
+	runr := RunResult{}
+	runr.Host = host
+	passwords := []string{"abc", "passw0rd"}
+	var client *ssh.Client
+	var err error
+	for _, password := range passwords {
+		if client, err = autologin.Connect("root", password, runr.Host, 22); err == nil {
+			break
+		}
+	}
+	defer client.Close()
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+	//Exec cmd then quit
+	commands = strings.TrimRight(commands, ";")
+	command := strings.Split(commands, ";")
+	cmdNew := strings.Join(command, "&&")
+	out, err := session.CombinedOutput(cmdNew)
+	if err != nil {
+		runr.Status = "Failed"
+		runr.RetrunCode = "1"
+	}
+	runr.Status = "Success"
+	runr.RetrunCode = "0"
+	runr.Result = string(out)
+	return runr
 }
