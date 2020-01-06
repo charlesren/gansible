@@ -18,17 +18,13 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"strings"
-
-	"gansible/pkg/autologin"
 	"gansible/pkg/utils"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh"
 )
 
 var commands string
+var hosts string
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -42,36 +38,22 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		runr := utils.RunResult{}
-		runr.Host = args[0]
-		passwords := []string{"abc", "passw0rd"}
-		var client *ssh.Client
-		var err error
-		for _, password := range passwords {
-			if client, err = autologin.Connect("root", password, runr.Host, 22); err == nil {
-				break
+		if hosts != "" {
+			ip, err := utils.ParseIPStr(hosts)
+			if err != nil {
+				fmt.Println(err)
 			}
+			for _, host := range ip {
+				runr := utils.DoCommand(host, commands)
+				runinfo := utils.RunInfo(runr)
+				fmt.Println(runinfo)
+			}
+		} else {
+			host := args[0]
+			runr := utils.DoCommand(host, commands)
+			runinfo := utils.RunInfo(runr)
+			fmt.Println(runinfo)
 		}
-		defer client.Close()
-		session, err := client.NewSession()
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer session.Close()
-		//Exec cmd then quit
-		commands = strings.TrimRight(commands, ";")
-		command := strings.Split(commands, ";")
-		cmdNew := strings.Join(command, "&&")
-		out, err := session.CombinedOutput(cmdNew)
-		if err != nil {
-			runr.Status = "Failed"
-			runr.RetrunCode = "1"
-		}
-		runr.Status = "Success"
-		runr.RetrunCode = "0"
-		runr.Result = string(out)
-		runinfo := utils.RunInfo(runr)
-		fmt.Println(runinfo)
 	},
 }
 
@@ -88,5 +70,6 @@ func init() {
 	// is called directly, e.g.:
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	runCmd.Flags().StringVarP(&commands, "commands", "c", "", "separate multiple command with semicolons. (Example:  pwd;ls)")
+	runCmd.Flags().StringVarP(&hosts, "hosts", "H", "", "support style like 10.0.0.1;10.1.1.1-3;10.2.2.2-10.2.2.5;10.3.3.1/31")
 	runCmd.MarkFlagRequired("commands")
 }
