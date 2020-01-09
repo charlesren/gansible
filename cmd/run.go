@@ -42,10 +42,14 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			fmt.Println(err)
 		}
-		for _, host := range ip {
-			runr := utils.DoCommand(host, commands)
-			runinfo := utils.RunInfo(runr)
-			fmt.Println(runinfo)
+		if ip == nil {
+			fmt.Println("No hosts specified!!!")
+		} else {
+			for _, host := range ip {
+				runr := utils.DoCommand(host, commands)
+				runinfo := utils.RunInfo(runr)
+				fmt.Println(runinfo)
+			}
 		}
 	},
 }
