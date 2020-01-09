@@ -38,18 +38,11 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if hosts != "" {
-			ip, err := utils.ParseIPStr(hosts)
-			if err != nil {
-				fmt.Println(err)
-			}
-			for _, host := range ip {
-				runr := utils.DoCommand(host, commands)
-				runinfo := utils.RunInfo(runr)
-				fmt.Println(runinfo)
-			}
-		} else {
-			host := args[0]
+		ip, err := utils.ParseIPStr(hosts)
+		if err != nil {
+			fmt.Println(err)
+		}
+		for _, host := range ip {
 			runr := utils.DoCommand(host, commands)
 			runinfo := utils.RunInfo(runr)
 			fmt.Println(runinfo)
