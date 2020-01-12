@@ -33,9 +33,8 @@ var wg sync.WaitGroup
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run commands on multiple hosts in parallel",
-	Long: `Run commands on multiple hosts in parallel,return result when finished.
-	Default number of concurrenrt tasks is 100.
-	Default timeout of each task is 180 seconds.`,
+	Long: `Run commands on multiple hosts in parallel,return result when finished.Default number of concurrenrt tasks is 100.
+Default timeout of each task is 180 seconds.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ip, err := utils.ParseIPStr(hosts)
