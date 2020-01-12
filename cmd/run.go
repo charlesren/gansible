@@ -32,13 +32,10 @@ var wg sync.WaitGroup
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Run commands on multiple hosts in parallel",
+	Long: `Run commands on multiple hosts in parallel,return result when finished.
+	Default number of concurrenrt tasks is 100.
+	Default timeout of each task is 180 seconds.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ip, err := utils.ParseIPStr(hosts)
@@ -46,7 +43,7 @@ to quickly create a Cobra application.`,
 			fmt.Println(err)
 		}
 		if ip == nil {
-			fmt.Println("No hosts specified!!!")
+			fmt.Println("No hosts specified!")
 		} else {
 			size = 100
 			p, _ := ants.NewPool(size)
