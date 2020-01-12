@@ -29,14 +29,9 @@ import (
 // shellCmd represents the shell command
 var shellCmd = &cobra.Command{
 	Use:   "shell",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Args: cobra.ExactArgs(1),
+	Short: "Open a remote shell session to remote machine",
+	Long:  `Open a remote shell session to remote machine,so that you can execute command just like in localhost.`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		host := args[0]
 		fmt.Println("Host:", host)
