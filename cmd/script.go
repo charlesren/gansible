@@ -98,10 +98,8 @@ to quickly create a Cobra application.`,
 					if dir != "" {
 						cmd = "cd " + dir + ";" + cmd
 					}
-					out, err := session.CombinedOutput(cmd)
-					if err != nil {
-						fmt.Println(string(out))
-					}
+					out, _ := session.CombinedOutput(cmd)
+					fmt.Println(string(out))
 					wg.Done()
 				})
 			}
