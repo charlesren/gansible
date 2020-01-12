@@ -1,6 +1,6 @@
 //Package cmd ...
 /*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 NAME HERE <EMAIL ADDRESS>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import (
 var src string
 var dest string
 
-// copyCmd represents the copy command
-var copyCmd = &cobra.Command{
-	Use:   "copy",
+// pushCmd represents the push command
+var pushCmd = &cobra.Command{
+	Use:   "push",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -42,7 +42,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("copy called")
+		fmt.Println("push called")
 		host := args[0]
 		fmt.Println("Host:", host)
 		passwords := []string{"abc", "passw0rd"}
@@ -89,19 +89,19 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
-	rootCmd.AddCommand(copyCmd)
+	rootCmd.AddCommand(pushCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// copyCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// pushCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// copyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	copyCmd.Flags().StringVarP(&src, "src", "s", "", "Source file or directory")
-	copyCmd.MarkFlagRequired("src")
-	copyCmd.Flags().StringVarP(&dest, "dest", "d", "", "Destination file or directory")
-	copyCmd.MarkFlagRequired("dest")
+	// pushCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	pushCmd.Flags().StringVarP(&src, "src", "s", "", "Source file or directory")
+	pushCmd.MarkFlagRequired("src")
+	pushCmd.Flags().StringVarP(&dest, "dest", "d", "", "Destination file or directory")
+	pushCmd.MarkFlagRequired("dest")
 }
