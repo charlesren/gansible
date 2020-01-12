@@ -71,10 +71,10 @@ func ParseIPStr(ipStr string) ([]string, error) {
 	for _, field := range fields {
 		field = strings.TrimSpace(field)
 		if field == "" {
-			return IP, nil
+			continue
 		}
 		if strings.HasPrefix(field, "#") {
-			return IP, nil
+			continue
 		}
 		if strings.Contains(field, "-") {
 			f := strings.Split(field, "-")
@@ -112,14 +112,14 @@ func ParseIPStr(ipStr string) ([]string, error) {
 				return IP, fmt.Errorf("Illegal IP range,Plesae check")
 			case dValue == 0:
 				IP = append(IP, startIP)
-				return IP, nil
+				continue
 			case dValue > 0:
 				for i := 0; i <= dValue; i++ {
 					newIPBlock := append(startIPPrefix, strconv.Itoa(startIPLastNo+i))
 					newIP := strings.Join(newIPBlock, ".")
 					IP = append(IP, newIP)
 				}
-				return IP, nil
+				continue
 			}
 		} else if strings.Contains(field, "/") {
 			splitted := strings.Split(field, "/")
@@ -134,28 +134,33 @@ func ParseIPStr(ipStr string) ([]string, error) {
 				field = strings.Join(splitted, "/")
 			}
 			if splitted[1] == "32" {
-				return []string{splitted[0]}, nil
+				IP = append(IP, splitted[0])
+				continue
+				//	return []string{splitted[0]}, nil
 			}
 			ip, ipnet, err := net.ParseCIDR(field)
 			if err != nil {
 				return nil, err
 			}
 
+			var tempIP []string
 			for ip := ip.Mask(ipnet.Mask); ipnet.Contains(ip); inc(ip) {
-				IP = append(IP, ip.String())
+				tempIP = append(tempIP, ip.String())
 			}
 			// remove network address and broadcast address
-			return IP[1 : len(IP)-1], nil
+			for i := 1; i < len(tempIP)-1; i++ {
+				IP = append(IP, tempIP[i])
+			}
+			//return IP[1 : len(IP)-1], nil
+			continue
 		} else {
 			ip := net.ParseIP(field)
 			if ip == nil {
 				return IP, fmt.Errorf("Illegal IP range,Plesae check")
 			}
 			IP = append(IP, ip.String())
-			return IP, nil
 		}
 	}
-
 	return IP, nil
 }
 
