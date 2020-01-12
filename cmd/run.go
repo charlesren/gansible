@@ -19,15 +19,14 @@ package cmd
 import (
 	"fmt"
 	"gansible/pkg/utils"
-	"sync"
-
+	"github.com/panjf2000/ants/v2"
 	"github.com/spf13/cobra"
+	"sync"
 )
 
 var commands string
 var hosts string
 var size int
-var ch = make(chan string, size)
 var wg sync.WaitGroup
 
 // runCmd represents the run command
@@ -49,16 +48,17 @@ to quickly create a Cobra application.`,
 		if ip == nil {
 			fmt.Println("No hosts specified!!!")
 		} else {
+			size = 100
+			p, _ := ants.NewPool(size)
+			defer p.Release()
 			for _, host := range ip {
-				go func(commands string) {
-					host := <-ch
+				wg.Add(1)
+				_ = p.Submit(func() {
 					runr := utils.DoCommand(host, commands)
 					runinfo := utils.RunInfo(runr)
 					fmt.Println(runinfo)
 					wg.Done()
-				}(commands)
-				ch <- host
-				wg.Add(1)
+				})
 			}
 			wg.Wait()
 		}
