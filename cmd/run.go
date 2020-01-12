@@ -78,7 +78,7 @@ func init() {
 	// is called directly, e.g.:
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	runCmd.Flags().StringVarP(&commands, "commands", "c", "", "separate multiple command with semicolons(eg: pwd;ls)")
-	runCmd.Flags().StringVarP(&hosts, "hosts", "H", "", "eg: 10.0.0.1;10.1.1.1-3;10.2.2.2-10.2.2.5")
+	runCmd.Flags().StringVarP(&hosts, "hosts", "H", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
 	runCmd.MarkFlagRequired("commands")
 	runCmd.MarkFlagRequired("hosts")
 }
