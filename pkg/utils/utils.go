@@ -67,16 +67,15 @@ func SumInfo(sumr SumResult, startTime time.Time) string {
 //ParseIPStr parse  given string then store proper ips into []sting
 func ParseIPStr(ipStr string) ([]string, error) {
 	var IP []string
-	ipStr = strings.TrimSpace(ipStr)
-	if ipStr == "" {
-		return IP, nil
-	}
-	if strings.HasPrefix(ipStr, "#") {
-		return IP, nil
-	}
-	ipStr = strings.TrimRight(ipStr, ";")
 	fields := strings.Split(ipStr, ";")
 	for _, field := range fields {
+		field = strings.TrimSpace(field)
+		if field == "" {
+			return IP, nil
+		}
+		if strings.HasPrefix(field, "#") {
+			return IP, nil
+		}
 		if strings.Contains(field, "-") {
 			f := strings.Split(field, "-")
 			startIP := f[0]
