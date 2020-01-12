@@ -18,10 +18,16 @@ package cmd
 
 import (
 	"fmt"
+	"gansible/pkg/autologin"
 	"gansible/pkg/utils"
+	"log"
+	"os"
+	"path"
 
 	"github.com/panjf2000/ants/v2"
+	"github.com/pkg/sftp"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh"
 )
 
 var dir string
@@ -38,6 +44,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		scriptFile := args[0]
 		ip, err := utils.ParseIPStr(hosts)
 		if err != nil {
 			fmt.Println(err)
@@ -51,9 +58,50 @@ to quickly create a Cobra application.`,
 			for _, host := range ip {
 				wg.Add(1)
 				_ = p.Submit(func() {
-					runr := utils.DoCommand(host, commands)
-					runinfo := utils.RunInfo(runr)
-					fmt.Println(runinfo)
+					passwords := []string{"abc", "passw0rd"}
+					var client *ssh.Client
+					var err error
+					for _, password := range passwords {
+						if client, err = autologin.Connect("root", password, host, 22); err == nil {
+							break
+						}
+					}
+					defer client.Close()
+					var sftpClient *sftp.Client
+					sftpClient, err = sftp.NewClient(client)
+					if err != nil {
+						log.Fatal(err)
+					}
+					srcFile, err := sftpClient.Open(scriptFile)
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer srcFile.Close()
+					tempDir := os.TempDir()
+					var destFileName = path.Base(scriptFile)
+					destFilePath := path.Join(tempDir, destFileName)
+					destFile, err := os.Create(destFilePath)
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer destFile.Close()
+
+					if _, err = srcFile.WriteTo(destFile); err != nil {
+						log.Fatal(err)
+					}
+					session, err := client.NewSession()
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer session.Close()
+					cmd := "sh " + destFilePath
+					if dir != "" {
+						cmd = "cd " + dir + ";" + cmd
+					}
+					out, err := session.CombinedOutput(cmd)
+					if err != nil {
+						fmt.Println(string(out))
+					}
 					wg.Done()
 				})
 			}
