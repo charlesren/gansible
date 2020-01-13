@@ -26,15 +26,14 @@ import (
 
 var commands string
 var hosts string
-var fork int
 var wg sync.WaitGroup
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run commands on multiple hosts in parallel",
-	Long: `Run commands on multiple hosts in parallel,return result when finished.Default number of concurrenrt tasks is 100.
-Default timeout of each task is 180 seconds.`,
+	Long: `Run commands on multiple hosts in parallel,return result when finished.Default number of concurrenrt tasks is 5.
+Default timeout of each task is 300 seconds.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		ip, err := utils.ParseIPStr(hosts)
@@ -44,8 +43,13 @@ Default timeout of each task is 180 seconds.`,
 		if ip == nil {
 			fmt.Println("No hosts specified!")
 		} else {
-			fork = 5
-			p, _ := ants.NewPool(fork)
+			if forks < 1 {
+				forks = 1
+			} else if forks > 10000 {
+				fmt.Println("Max forks is 10000")
+				return
+			}
+			p, _ := ants.NewPool(forks)
 			defer p.Release()
 			for _, host := range ip {
 				wg.Add(1)

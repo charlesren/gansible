@@ -47,8 +47,13 @@ var scriptCmd = &cobra.Command{
 		if ip == nil {
 			fmt.Println("No hosts specified!!!")
 		} else {
-			fork = 100
-			p, _ := ants.NewPool(fork)
+			if forks < 1 {
+				forks = 1
+			} else if forks > 10000 {
+				fmt.Println("Max forks is 10000")
+				return
+			}
+			p, _ := ants.NewPool(forks)
 			defer p.Release()
 			for _, host := range ip {
 				wg.Add(1)
