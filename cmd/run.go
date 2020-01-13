@@ -27,6 +27,7 @@ import (
 var commands string
 var hosts string
 var wg sync.WaitGroup
+var timeout int
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -54,7 +55,7 @@ Default timeout of each task is 300 seconds.`,
 			for _, host := range ip {
 				wg.Add(1)
 				_ = p.Submit(func() {
-					runr := utils.DoCommand(host, commands)
+					runr := utils.DoCommand(host, commands, timeout)
 					runinfo := utils.RunInfo(runr)
 					fmt.Println(runinfo)
 					wg.Done()
@@ -79,6 +80,7 @@ func init() {
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	runCmd.Flags().StringVarP(&commands, "commands", "c", "", "separate multiple command with semicolons(eg: pwd;ls)")
 	runCmd.Flags().StringVarP(&hosts, "hosts", "H", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	runCmd.Flags().IntVarP(&timeout, "timeout", "", 300, "task should finished before timeout")
 	runCmd.MarkFlagRequired("commands")
 	runCmd.MarkFlagRequired("hosts")
 }

@@ -174,7 +174,9 @@ func inc(ip net.IP) {
 }
 
 //DoCommand open a ssh session on a given host and run given commands  then return result
-func DoCommand(host string, commands string) RunResult {
+func DoCommand(host string, commands string, timeout int) RunResult {
+	timer := time.NewTimer(time.Duration(timeout) * time.Second)
+	defer timer.Stop()
 	runr := RunResult{}
 	runr.Host = host
 	passwords := []string{"abc", "passw0rd"}
@@ -203,5 +205,16 @@ func DoCommand(host string, commands string) RunResult {
 	runr.Status = "Success"
 	runr.RetrunCode = "0"
 	runr.Result = string(out)
-	return runr
+	ch := make(chan bool, 1)
+	ch <- true
+	close(ch)
+	select {
+	case <-ch:
+		return runr
+	case <-timer.C:
+		runr.Status = "TimeOut"
+		runr.RetrunCode = "1"
+		runr.Result = fmt.Sprintf("Task not finished before %d seconds", timeout)
+		return runr
+	}
 }
