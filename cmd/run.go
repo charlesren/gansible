@@ -26,7 +26,7 @@ import (
 
 var commands string
 var hosts string
-var size int
+var fork int
 var wg sync.WaitGroup
 
 // runCmd represents the run command
@@ -44,8 +44,8 @@ Default timeout of each task is 180 seconds.`,
 		if ip == nil {
 			fmt.Println("No hosts specified!")
 		} else {
-			size = 100
-			p, _ := ants.NewPool(size)
+			fork = 5
+			p, _ := ants.NewPool(fork)
 			defer p.Release()
 			for _, host := range ip {
 				wg.Add(1)
