@@ -182,11 +182,7 @@ func DoCommand(host string, commands string, timeout int) RunResult {
 	passwords := []string{"abc", "passw0rd"}
 	var client *ssh.Client
 	var err error
-	for _, password := range passwords {
-		if client, err = autologin.Connect("root", password, runr.Host, 22); err == nil {
-			break
-		}
-	}
+	client, err = TryPasswords("root", passwords, host, 22, 30)
 	if client != nil {
 		defer client.Close()
 	} else {
