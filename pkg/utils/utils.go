@@ -226,21 +226,6 @@ func DoCommand(host string, commands string, timeout int) RunResult {
 	}
 }
 
-//TryPass ssh to a machine using a set of possible passwords
-func TryPass(user string, passwords []string, host string, port int) (*ssh.Client, error) {
-	var client *ssh.Client
-	var err error
-	for i, password := range passwords {
-		if client, err = autologin.Connect("root", password, host, 22); err == nil {
-			break
-		}
-		if i == len(passwords) {
-			fmt.Println("All passwords are wrong")
-		}
-	}
-	return client, err
-}
-
 //TryPasswords ssh to a machine using a set of possible passwords concurrently.
 func TryPasswords(user string, passwords []string, host string, port int, sshTimeout int) (*ssh.Client, error) {
 	timer := time.NewTimer(time.Duration(sshTimeout) * time.Second)
