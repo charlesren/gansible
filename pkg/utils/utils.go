@@ -187,7 +187,14 @@ func DoCommand(host string, commands string, timeout int) RunResult {
 			break
 		}
 	}
-	defer client.Close()
+	if client != nil {
+		defer client.Close()
+	} else {
+		runr.Status = "Unreachable"
+		runr.RetrunCode = "1"
+		runr.Result = "All passwords are wrong"
+		return runr
+	}
 	session, err := client.NewSession()
 	if err != nil {
 		log.Fatal(err)
@@ -217,4 +224,19 @@ func DoCommand(host string, commands string, timeout int) RunResult {
 		runr.Result = fmt.Sprintf("Task not finished before %d seconds", timeout)
 		return runr
 	}
+}
+
+//TryPass ssh to a machine using a set of possible passwords
+func TryPass(user string, passwords []string, host string, port int) (*ssh.Client, error) {
+	var client *ssh.Client
+	var err error
+	for i, password := range passwords {
+		if client, err = autologin.Connect("root", password, host, 22); err == nil {
+			break
+		}
+		if i == len(passwords) {
+			fmt.Println("All passwords are wrong")
+		}
+	}
+	return client, err
 }
