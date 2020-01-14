@@ -240,3 +240,26 @@ func TryPass(user string, passwords []string, host string, port int) (*ssh.Clien
 	}
 	return client, err
 }
+
+//TryPasswords ssh to a machine using a set of possible passwords concurrently.
+func TryPasswords(user string, passwords []string, host string, port int, sshTimeout int) (*ssh.Client, error) {
+	timer := time.NewTimer(time.Duration(sshTimeout) * time.Second)
+	defer timer.Stop()
+	ch := make(chan *ssh.Client)
+	err := fmt.Errorf("Time out in %d seconds", sshTimeout)
+	for _, password := range passwords {
+		go func(password string) {
+			c, err := autologin.Connect("root", password, host, 22)
+			if err == nil {
+				ch <- c
+			} else {
+			}
+		}(password)
+	}
+	select {
+	case client := <-ch:
+		return client, nil
+	case <-timer.C:
+		return nil, err
+	}
+}
