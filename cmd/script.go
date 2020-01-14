@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"gansible/pkg/autologin"
 	"gansible/pkg/utils"
 	"log"
 	"os"
@@ -61,46 +60,47 @@ var scriptCmd = &cobra.Command{
 					passwords := []string{"abc", "passw0rd"}
 					var client *ssh.Client
 					var err error
-					for _, password := range passwords {
-						if client, err = autologin.Connect("root", password, host, 22); err == nil {
-							break
+					client, err = utils.TryPass("root", passwords, host, 22)
+					if client == nil {
+						fmt.Println("All passwords are wrong.")
+						wg.Done()
+					} else {
+						defer client.Close()
+						var sftpClient *sftp.Client
+						sftpClient, err = sftp.NewClient(client)
+						if err != nil {
+							log.Fatal(err)
 						}
-					}
-					defer client.Close()
-					var sftpClient *sftp.Client
-					sftpClient, err = sftp.NewClient(client)
-					if err != nil {
-						log.Fatal(err)
-					}
-					srcFile, err := sftpClient.Open(scriptFile)
-					if err != nil {
-						log.Fatal(err)
-					}
-					defer srcFile.Close()
-					tempDir := os.TempDir()
-					var destFileName = path.Base(scriptFile)
-					destFilePath := path.Join(tempDir, destFileName)
-					destFile, err := os.Create(destFilePath)
-					if err != nil {
-						log.Fatal(err)
-					}
-					defer destFile.Close()
+						srcFile, err := sftpClient.Open(scriptFile)
+						if err != nil {
+							log.Fatal(err)
+						}
+						defer srcFile.Close()
+						tempDir := os.TempDir()
+						var destFileName = path.Base(scriptFile)
+						destFilePath := path.Join(tempDir, destFileName)
+						destFile, err := os.Create(destFilePath)
+						if err != nil {
+							log.Fatal(err)
+						}
+						defer destFile.Close()
 
-					if _, err = srcFile.WriteTo(destFile); err != nil {
-						log.Fatal(err)
+						if _, err = srcFile.WriteTo(destFile); err != nil {
+							log.Fatal(err)
+						}
+						session, err := client.NewSession()
+						if err != nil {
+							log.Fatal(err)
+						}
+						defer session.Close()
+						cmd := "sh " + destFilePath
+						if dir != "" {
+							cmd = "cd " + dir + ";" + cmd
+						}
+						out, _ := session.CombinedOutput(cmd)
+						fmt.Println(string(out))
+						wg.Done()
 					}
-					session, err := client.NewSession()
-					if err != nil {
-						log.Fatal(err)
-					}
-					defer session.Close()
-					cmd := "sh " + destFilePath
-					if dir != "" {
-						cmd = "cd " + dir + ";" + cmd
-					}
-					out, _ := session.CombinedOutput(cmd)
-					fmt.Println(string(out))
-					wg.Done()
 				})
 			}
 			wg.Wait()
