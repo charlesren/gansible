@@ -60,7 +60,7 @@ var scriptCmd = &cobra.Command{
 					passwords := []string{"abc", "passw0rd"}
 					var client *ssh.Client
 					var err error
-					client, err = utils.TryPasswords("root", passwords, host, 22, 10)
+					client, err = utils.TryPasswords("root", passwords, host, 22, 30)
 					if client == nil {
 						fmt.Println("All passwords are wrong.")
 						wg.Done()
