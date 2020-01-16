@@ -244,3 +244,46 @@ func TryPasswords(user string, passwords []string, host string, port int, sshTim
 		return nil, errTimeout
 	}
 }
+
+//ExecResult struct store command execute result
+type ExecResult struct {
+	Status     string
+	RetrunCode string
+	Result     string
+}
+
+//Execute run given commands  on  ssh clinet then return ExecResult
+func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
+	timer := time.NewTimer(time.Duration(timeout) * time.Second)
+	defer timer.Stop()
+	runr := ExecResult{}
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer session.Close()
+	//Exec cmd then quit
+	commands = strings.TrimRight(commands, ";")
+	command := strings.Split(commands, ";")
+	cmdNew := strings.Join(command, "&&")
+	out, err := session.CombinedOutput(cmdNew)
+	if err != nil {
+		runr.Status = "Failed"
+		runr.RetrunCode = "1"
+	}
+	runr.Status = "Success"
+	runr.RetrunCode = "0"
+	runr.Result = string(out)
+	ch := make(chan bool, 1)
+	ch <- true
+	close(ch)
+	select {
+	case <-ch:
+		return runr
+	case <-timer.C:
+		runr.Status = "TimeOut"
+		runr.RetrunCode = "1"
+		runr.Result = fmt.Sprintf("Task not finished before %d seconds", timeout)
+		return runr
+	}
+}
