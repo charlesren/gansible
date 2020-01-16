@@ -227,7 +227,7 @@ func TryPasswords(user string, passwords []string, host string, port int, sshTim
 	timer := time.NewTimer(time.Duration(sshTimeout) * time.Second)
 	defer timer.Stop()
 	ch := make(chan *ssh.Client)
-	err := fmt.Errorf("Time out in %d seconds", sshTimeout)
+	errTimeout := fmt.Errorf("Time out in %d seconds", sshTimeout)
 	for _, password := range passwords {
 		go func(password string) {
 			c, err := autologin.Connect("root", password, host, 22)
@@ -241,6 +241,6 @@ func TryPasswords(user string, passwords []string, host string, port int, sshTim
 	case client := <-ch:
 		return client, nil
 	case <-timer.C:
-		return nil, err
+		return nil, errTimeout
 	}
 }
