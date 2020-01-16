@@ -19,9 +19,11 @@ package cmd
 import (
 	"fmt"
 	"gansible/pkg/utils"
+	"sync"
+
 	"github.com/panjf2000/ants/v2"
 	"github.com/spf13/cobra"
-	"sync"
+	"golang.org/x/crypto/ssh"
 )
 
 var commands string
@@ -53,12 +55,28 @@ Default timeout of each task is 300 seconds.`,
 			p, _ := ants.NewPool(forks)
 			defer p.Release()
 			for _, host := range ip {
-				wg.Add(1)
+				//wg.Add(1)
+				//_ = p.Submit(func() {
+				//runr := utils.DoCommand(host, commands, timeout)
+				//runinfo := utils.RunInfo(runr)
+				//fmt.Println(runinfo)
+				//wg.Done()
+				//})
 				_ = p.Submit(func() {
-					runr := utils.DoCommand(host, commands, timeout)
-					runinfo := utils.RunInfo(runr)
-					fmt.Println(runinfo)
-					wg.Done()
+					wg.Add(1)
+					passwords := []string{"abc", "passw0rd"}
+					var client *ssh.Client
+					client, _ = utils.TryPasswords("root", passwords, host, 22, 30)
+					if client == nil {
+						fmt.Println("All passwords are wrong.")
+					} else {
+						defer client.Close()
+						timeout := 300
+						runr := utils.Execute(client, commands, timeout)
+						//runinfo := utils.RunInfo(runr)
+						fmt.Println(runr)
+						wg.Done()
+					}
 				})
 			}
 			wg.Wait()
