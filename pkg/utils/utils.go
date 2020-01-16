@@ -39,8 +39,8 @@ func RunInfo(runr RunResult) string {
 }
 
 //ExecInfo gengrate information of cmd result executed by ssh session
-func ExecInfo(host string,execr ExecResult) string {
-	execInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s",host, execr.Status, execr.RetrunCode, execr.Result)
+func ExecInfo(host string, execr ExecResult) string {
+	execInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s", host, execr.Status, execr.RetrunCode, execr.Result)
 	return execInfo
 }
 
@@ -262,7 +262,7 @@ type ExecResult struct {
 func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	timer := time.NewTimer(time.Duration(timeout) * time.Second)
 	defer timer.Stop()
-	runr := ExecResult{}
+	execr := ExecResult{}
 	session, err := client.NewSession()
 	if err != nil {
 		log.Fatal(err)
@@ -274,22 +274,22 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	cmdNew := strings.Join(command, "&&")
 	out, err := session.CombinedOutput(cmdNew)
 	if err != nil {
-		runr.Status = "Failed"
-		runr.RetrunCode = "1"
+		execr.Status = "Failed"
+		execr.RetrunCode = "1"
 	}
-	runr.Status = "Success"
-	runr.RetrunCode = "0"
-	runr.Result = string(out)
+	execr.Status = "Success"
+	execr.RetrunCode = "0"
+	execr.Result = string(out)
 	ch := make(chan bool, 1)
 	ch <- true
 	close(ch)
 	select {
 	case <-ch:
-		return runr
+		return execr
 	case <-timer.C:
-		runr.Status = "TimeOut"
-		runr.RetrunCode = "1"
-		runr.Result = fmt.Sprintf("Task not finished before %d seconds", timeout)
-		return runr
+		execr.Status = "TimeOut"
+		execr.RetrunCode = "1"
+		execr.Result = fmt.Sprintf("Task not finished before %d seconds", timeout)
+		return execr
 	}
 }
