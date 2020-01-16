@@ -24,20 +24,6 @@ type SumResult struct {
 	Skiped      []interface{}
 }
 
-//RunResult struct store cmd run result of ssh session
-type RunResult struct {
-	Host       string
-	Status     string
-	RetrunCode string
-	Result     string
-}
-
-//RunInfo gengrate information of cmd result executed by ssh session
-func RunInfo(runr RunResult) string {
-	runInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s", runr.Host, runr.Status, runr.RetrunCode, runr.Result)
-	return runInfo
-}
-
 //ExecInfo gengrate information of cmd result executed by ssh session
 func ExecInfo(host string, execr ExecResult) string {
 	execInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s", host, execr.Status, execr.RetrunCode, execr.Result)
@@ -176,55 +162,6 @@ func inc(ip net.IP) {
 		if ip[j] > 0 {
 			break
 		}
-	}
-}
-
-//DoCommand open a ssh session on a given host and run given commands  then return result
-func DoCommand(host string, commands string, timeout int) RunResult {
-	timer := time.NewTimer(time.Duration(timeout) * time.Second)
-	defer timer.Stop()
-	runr := RunResult{}
-	runr.Host = host
-	passwords := []string{"abc", "passw0rd"}
-	var client *ssh.Client
-	var err error
-	client, err = TryPasswords("root", passwords, host, 22, 30)
-	if client != nil {
-		defer client.Close()
-	} else {
-		runr.Status = "Unreachable"
-		runr.RetrunCode = "1"
-		runr.Result = "All passwords are wrong"
-		return runr
-	}
-	session, err := client.NewSession()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer session.Close()
-	//Exec cmd then quit
-	commands = strings.TrimRight(commands, ";")
-	command := strings.Split(commands, ";")
-	cmdNew := strings.Join(command, "&&")
-	out, err := session.CombinedOutput(cmdNew)
-	if err != nil {
-		runr.Status = "Failed"
-		runr.RetrunCode = "1"
-	}
-	runr.Status = "Success"
-	runr.RetrunCode = "0"
-	runr.Result = string(out)
-	ch := make(chan bool, 1)
-	ch <- true
-	close(ch)
-	select {
-	case <-ch:
-		return runr
-	case <-timer.C:
-		runr.Status = "TimeOut"
-		runr.RetrunCode = "1"
-		runr.Result = fmt.Sprintf("Task not finished before %d seconds", timeout)
-		return runr
 	}
 }
 
