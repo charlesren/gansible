@@ -40,7 +40,6 @@ var shellCmd = &cobra.Command{
 		client, _ = utils.TryPasswords("root", passwords, host, 22, 30)
 		if client == nil {
 			fmt.Println("All passwords are wrong.")
-			wg.Done()
 		} else {
 			defer client.Close()
 			session, err := client.NewSession()
