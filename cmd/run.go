@@ -56,12 +56,6 @@ Default timeout of each task is 300 seconds.`,
 			defer p.Release()
 			for _, host := range ip {
 				wg.Add(1)
-				//_ = p.Submit(func() {
-				//runr := utils.DoCommand(host, commands, timeout)
-				//runinfo := utils.RunInfo(runr)
-				//fmt.Println(runinfo)
-				//wg.Done()
-				//})
 				_ = p.Submit(func() {
 					passwords := []string{"abc", "passw0rd"}
 					var client *ssh.Client
