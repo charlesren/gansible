@@ -38,6 +38,12 @@ func RunInfo(runr RunResult) string {
 	return runInfo
 }
 
+//ExecInfo gengrate information of cmd result executed by ssh session
+func ExecInfo(host string,execr ExecResult) string {
+	execInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s",host, execr.Status, execr.RetrunCode, execr.Result)
+	return execInfo
+}
+
 // AppendToFile will print any string of text to a file safely by
 // checking for errors and syncing at the end.
 func AppendToFile(file string, str string) error {
