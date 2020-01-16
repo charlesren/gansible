@@ -52,56 +52,60 @@ var scriptCmd = &cobra.Command{
 				fmt.Println("Max forks is 10000")
 				return
 			}
-			p, _ := ants.NewPool(forks)
+			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
+				h, ok := host.(string)
+				if !ok {
+					return
+				}
+				passwords := []string{"abc", "passw0rd"}
+				var client *ssh.Client
+				var err error
+				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
+				if client == nil {
+					fmt.Println("All passwords are wrong.")
+					wg.Done()
+				} else {
+					defer client.Close()
+					var sftpClient *sftp.Client
+					sftpClient, err = sftp.NewClient(client)
+					if err != nil {
+						log.Fatal(err)
+					}
+					srcFile, err := sftpClient.Open(scriptFile)
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer srcFile.Close()
+					tempDir := os.TempDir()
+					var destFileName = path.Base(scriptFile)
+					destFilePath := path.Join(tempDir, destFileName)
+					destFile, err := os.Create(destFilePath)
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer destFile.Close()
+
+					if _, err = srcFile.WriteTo(destFile); err != nil {
+						log.Fatal(err)
+					}
+					session, err := client.NewSession()
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer session.Close()
+					cmd := "sh " + destFilePath
+					if dir != "" {
+						cmd = "cd " + dir + ";" + cmd
+					}
+					out, _ := session.CombinedOutput(cmd)
+					fmt.Println(string(out))
+					wg.Done()
+				}
+			})
 			defer p.Release()
 			for _, host := range ip {
 				wg.Add(1)
-				_ = p.Submit(func() {
-					passwords := []string{"abc", "passw0rd"}
-					var client *ssh.Client
-					var err error
-					client, err = utils.TryPasswords("root", passwords, host, 22, 30)
-					if client == nil {
-						fmt.Println("All passwords are wrong.")
-						wg.Done()
-					} else {
-						defer client.Close()
-						var sftpClient *sftp.Client
-						sftpClient, err = sftp.NewClient(client)
-						if err != nil {
-							log.Fatal(err)
-						}
-						srcFile, err := sftpClient.Open(scriptFile)
-						if err != nil {
-							log.Fatal(err)
-						}
-						defer srcFile.Close()
-						tempDir := os.TempDir()
-						var destFileName = path.Base(scriptFile)
-						destFilePath := path.Join(tempDir, destFileName)
-						destFile, err := os.Create(destFilePath)
-						if err != nil {
-							log.Fatal(err)
-						}
-						defer destFile.Close()
-
-						if _, err = srcFile.WriteTo(destFile); err != nil {
-							log.Fatal(err)
-						}
-						session, err := client.NewSession()
-						if err != nil {
-							log.Fatal(err)
-						}
-						defer session.Close()
-						cmd := "sh " + destFilePath
-						if dir != "" {
-							cmd = "cd " + dir + ";" + cmd
-						}
-						out, _ := session.CombinedOutput(cmd)
-						fmt.Println(string(out))
-						wg.Done()
-					}
-				})
+				p.Invoke(host)
 			}
 			wg.Wait()
 		}
