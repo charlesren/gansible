@@ -52,25 +52,29 @@ Default timeout of each task is 300 seconds.`,
 				fmt.Println("Max forks is 10000")
 				return
 			}
-			p, _ := ants.NewPool(forks)
+			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
+				h, ok := host.(string)
+				if !ok {
+					return
+				}
+				passwords := []string{"abc", "passw0rd"}
+				var client *ssh.Client
+				client, _ = utils.TryPasswords("root", passwords, h, 22, 30)
+				if client == nil {
+					fmt.Println("All passwords are wrong.")
+				} else {
+					defer client.Close()
+					timeout := 300
+					execr := utils.Execute(client, commands, timeout)
+					execinfo := utils.ExecInfo(h, execr)
+					fmt.Println(execinfo)
+				}
+				wg.Done()
+			})
 			defer p.Release()
 			for _, host := range ip {
 				wg.Add(1)
-				_ = p.Submit(func() {
-					passwords := []string{"abc", "passw0rd"}
-					var client *ssh.Client
-					client, _ = utils.TryPasswords("root", passwords, host, 22, 30)
-					if client == nil {
-						fmt.Println("All passwords are wrong.")
-					} else {
-						defer client.Close()
-						timeout := 300
-						execr := utils.Execute(client, commands, timeout)
-						execinfo := utils.ExecInfo(host, execr)
-						fmt.Println(execinfo)
-						wg.Done()
-					}
-				})
+				p.Invoke(host)
 			}
 			wg.Wait()
 		}
