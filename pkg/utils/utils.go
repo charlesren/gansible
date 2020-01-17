@@ -47,9 +47,9 @@ func AppendToFile(file string, str string) error {
 }
 
 //SumInfo gengrate summary of gansible result
-func SumInfo(sumr SumResult, startTime time.Time) string {
+func SumInfo(sumr SumResult) string {
 	sumr.EndTime = time.Now()
-	sumr.CostTime = sumr.EndTime.Sub(startTime)
+	sumr.CostTime = sumr.EndTime.Sub(sumr.StartTime)
 	endTimeStr := sumr.EndTime.Format("2006-01-02 15:04:05")
 	costTimeStr := sumr.CostTime.String()
 	totalNum := len(sumr.Failed) + len(sumr.Success) + len(sumr.Unreachable) + len(sumr.Skiped)

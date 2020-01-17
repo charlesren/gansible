@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"gansible/pkg/utils"
 	"sync"
+	"time"
 
 	"github.com/panjf2000/ants/v2"
 	"github.com/spf13/cobra"
@@ -39,6 +40,8 @@ var runCmd = &cobra.Command{
 Default timeout of each task is 300 seconds.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		var sumr utils.SumResult
+		sumr.StartTime = time.Now()
 		ip, err := utils.ParseIPStr(hosts)
 		if err != nil {
 			fmt.Println(err)
@@ -57,7 +60,6 @@ Default timeout of each task is 300 seconds.`,
 				if !ok {
 					return
 				}
-				passwords := []string{"abc", "passw0rd"}
 				var client *ssh.Client
 				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
 				if err != nil {
@@ -78,6 +80,8 @@ Default timeout of each task is 300 seconds.`,
 			}
 			wg.Wait()
 		}
+		sumrinfo := utils.SumInfo(sumr)
+		fmt.Println(sumrinfo)
 	},
 }
 
