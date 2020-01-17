@@ -215,21 +215,27 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	execr := ExecResult{}
 	session, err := client.NewSession()
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer session.Close()
-	//Exec cmd then quit
-	commands = strings.TrimRight(commands, ";")
-	command := strings.Split(commands, ";")
-	cmdNew := strings.Join(command, "&&")
-	out, err := session.CombinedOutput(cmdNew)
-	if err != nil {
 		execr.Status = "Failed"
 		execr.RetrunCode = "1"
+		execr.Result = err.Error()
+	} else {
+		defer session.Close()
+		//Exec cmd then quit
+		commands = strings.TrimRight(commands, ";")
+		command := strings.Split(commands, ";")
+		cmdNew := strings.Join(command, "&&")
+		out, err := session.CombinedOutput(cmdNew)
+		if err != nil {
+			execr.Status = "Failed"
+			execr.RetrunCode = "1"
+			execr.Result = string(out)
+		} else {
+			execr.Status = "Success"
+			execr.RetrunCode = "0"
+			execr.Result = string(out)
+		}
 	}
-	execr.Status = "Success"
-	execr.RetrunCode = "0"
-	execr.Result = string(out)
+	//send ExecResult
 	ch := make(chan bool, 1)
 	ch <- true
 	close(ch)
@@ -237,7 +243,7 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	case <-ch:
 		return execr
 	case <-timer.C:
-		execr.Status = "TimeOut"
+		execr.Status = "Timeout"
 		execr.RetrunCode = "1"
 		execr.Result = fmt.Sprintf("Task not finished before %d seconds", timeout)
 		return execr
