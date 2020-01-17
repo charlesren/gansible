@@ -16,19 +16,50 @@ import (
 
 //SumResult struct store execute summary result of gansible command
 type SumResult struct {
-	StartTime   time.Time
-	EndTime     time.Time
-	CostTime    time.Duration
-	Success     []interface{}
-	Failed      []interface{}
-	Unreachable []interface{}
-	Skiped      []interface{}
+	StartTime  time.Time
+	EndTime    time.Time
+	CostTime   time.Duration
+	ExecResult []ExecResult
+}
+
+//ExecResult struct store command execute result
+type ExecResult struct {
+	Status     string
+	RetrunCode string
+	Result     string
 }
 
 //ExecInfo gengrate information of cmd result executed by ssh session
 func ExecInfo(host string, execr ExecResult) string {
 	execInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s", host, execr.Status, execr.RetrunCode, execr.Result)
 	return execInfo
+}
+
+//SumInfo gengrate summary of gansible result
+func SumInfo(sumr SumResult) string {
+	sumr.EndTime = time.Now()
+	sumr.CostTime = sumr.EndTime.Sub(sumr.StartTime)
+	endTimeStr := sumr.EndTime.Format("2006-01-02 15:04:05")
+	costTimeStr := sumr.CostTime.String()
+	//totalNum := len(sumr.Failed) + len(sumr.Success) + len(sumr.Unreachable) + len(sumr.Skiped)
+	totalNum := len(sumr.ExecResult)
+	successNum := 0
+	failedNum := 0
+	unreachableNum := 0
+	skippedNum := 0
+	for _, r := range sumr.ExecResult {
+		if r.Status == "Success" {
+			successNum++
+		} else if r.Status == "Failed" {
+			failedNum++
+		} else if r.Status == "Unreachable" {
+			unreachableNum++
+		} else if r.Status == "Skipped" {
+			skippedNum++
+		}
+	}
+	sumi := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d", endTimeStr, costTimeStr, totalNum, successNum, failedNum, unreachableNum, skippedNum)
+	return sumi
 }
 
 // AppendToFile will print any string of text to a file safely by
@@ -44,17 +75,6 @@ func AppendToFile(file string, str string) error {
 		log.Fatal(err)
 	}
 	return f.Sync()
-}
-
-//SumInfo gengrate summary of gansible result
-func SumInfo(sumr SumResult) string {
-	sumr.EndTime = time.Now()
-	sumr.CostTime = sumr.EndTime.Sub(sumr.StartTime)
-	endTimeStr := sumr.EndTime.Format("2006-01-02 15:04:05")
-	costTimeStr := sumr.CostTime.String()
-	totalNum := len(sumr.Failed) + len(sumr.Success) + len(sumr.Unreachable) + len(sumr.Skiped)
-	sumi := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d", endTimeStr, costTimeStr, totalNum, len(sumr.Success), len(sumr.Failed), len(sumr.Unreachable), len(sumr.Skiped))
-	return sumi
 }
 
 //ParseIPStr parse  given string then store proper ips into []sting
@@ -199,13 +219,6 @@ func TryPasswords(user string, passwords []string, host string, port int, sshTim
 	case <-timer.C:
 		return nil, errTimeout
 	}
-}
-
-//ExecResult struct store command execute result
-type ExecResult struct {
-	Status     string
-	RetrunCode string
-	Result     string
 }
 
 //Execute run given commands  on  ssh clinet then return ExecResult

@@ -57,6 +57,7 @@ Default timeout of each task is 300 seconds.`,
 				return
 			}
 			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
+				execr := utils.ExecResult{}
 				h, ok := host.(string)
 				if !ok {
 					return
@@ -65,14 +66,18 @@ Default timeout of each task is 300 seconds.`,
 				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
 				if err != nil {
 					fmt.Println(err)
+					execr.Status = "Unreachable"
+					execr.RetrunCode = "1"
+					execr.Result = err.Error()
+					wg.Done()
+				} else {
+					defer client.Close()
+					timeout := 300
+					execr = utils.Execute(client, commands, timeout)
+					execinfo := utils.ExecInfo(h, execr)
+					fmt.Println(execinfo)
 					wg.Done()
 				}
-				defer client.Close()
-				timeout := 300
-				execr := utils.Execute(client, commands, timeout)
-				execinfo := utils.ExecInfo(h, execr)
-				fmt.Println(execinfo)
-				wg.Done()
 			})
 			defer p.Release()
 			for _, host := range ip {
