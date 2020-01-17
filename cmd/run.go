@@ -56,6 +56,7 @@ Default timeout of each task is 300 seconds.`,
 				fmt.Println("Max forks is 10000")
 				return
 			}
+			result := make(chan utils.ExecResult, len(ip))
 			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
 				execr := utils.ExecResult{}
 				h, ok := host.(string)
@@ -69,17 +70,27 @@ Default timeout of each task is 300 seconds.`,
 					execr.Status = "Unreachable"
 					execr.RetrunCode = "1"
 					execr.Result = err.Error()
+					execinfo := utils.ExecInfo(h, execr)
+					result <- execr
+					fmt.Println(execinfo)
 					wg.Done()
 				} else {
 					defer client.Close()
 					timeout := 300
 					execr = utils.Execute(client, commands, timeout)
 					execinfo := utils.ExecInfo(h, execr)
+					result <- execr
 					fmt.Println(execinfo)
 					wg.Done()
 				}
 			})
 			defer p.Release()
+			go func() {
+				for i := 0; i <= len(ip); i++ {
+					t := <-result
+					sumr.ExecResult = append(sumr.ExecResult, t)
+				}
+			}()
 			for _, host := range ip {
 				wg.Add(1)
 				p.Invoke(host)
