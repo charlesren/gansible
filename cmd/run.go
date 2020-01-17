@@ -62,6 +62,7 @@ Default timeout of each task is 300 seconds.`,
 				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
 				if err != nil {
 					fmt.Println(err)
+					wg.Done()
 				}
 				defer client.Close()
 				timeout := 300
