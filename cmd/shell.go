@@ -35,7 +35,6 @@ var shellCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		host := args[0]
 		fmt.Println("Host:", host)
-		passwords := []string{"abc", "passw0rd"}
 		var client *ssh.Client
 		client, _ = utils.TryPasswords("root", passwords, host, 22, 30)
 		if client == nil {

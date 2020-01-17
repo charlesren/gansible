@@ -28,6 +28,7 @@ import (
 
 var cfgFile string
 var forks int
+var passwords = []string{"abc", "passw0rd"}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
