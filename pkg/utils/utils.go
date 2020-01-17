@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -170,19 +171,31 @@ func TryPasswords(user string, passwords []string, host string, port int, sshTim
 	timer := time.NewTimer(time.Duration(sshTimeout) * time.Second)
 	defer timer.Stop()
 	ch := make(chan *ssh.Client)
+	count := 0
+	var mutex sync.Mutex
+	finish := make(chan bool)
 	errTimeout := fmt.Errorf("Time out in %d seconds", sshTimeout)
+	errAllPassWrong := fmt.Errorf("All passwords are wrong")
 	for _, password := range passwords {
 		go func(password string) {
 			c, err := autologin.Connect("root", password, host, 22)
 			if err == nil {
 				ch <- c
 			} else {
+				mutex.Lock()
+				count = count + 1
+				if count == len(passwords) {
+					finish <- true
+				}
+				mutex.Unlock()
 			}
 		}(password)
 	}
 	select {
 	case client := <-ch:
 		return client, nil
+	case <-finish:
+		return nil, errAllPassWrong
 	case <-timer.C:
 		return nil, errTimeout
 	}
