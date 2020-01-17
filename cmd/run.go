@@ -59,16 +59,15 @@ Default timeout of each task is 300 seconds.`,
 				}
 				passwords := []string{"abc", "passw0rd"}
 				var client *ssh.Client
-				client, _ = utils.TryPasswords("root", passwords, h, 22, 30)
-				if client == nil {
-					fmt.Println("All passwords are wrong.")
-				} else {
-					defer client.Close()
-					timeout := 300
-					execr := utils.Execute(client, commands, timeout)
-					execinfo := utils.ExecInfo(h, execr)
-					fmt.Println(execinfo)
+				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
+				if err != nil {
+					fmt.Println(err)
 				}
+				defer client.Close()
+				timeout := 300
+				execr := utils.Execute(client, commands, timeout)
+				execinfo := utils.ExecInfo(h, execr)
+				fmt.Println(execinfo)
 				wg.Done()
 			})
 			defer p.Release()
