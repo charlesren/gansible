@@ -14,6 +14,14 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+const (
+	StatusSuccess     string = "Success"
+	StatusFailed      string = "Failed"
+	StatusUnreachable string = "Unreachable"
+	StatusSkiped      string = "Skipped"
+	StatusTimeout     string = "Timeout"
+)
+
 //SumResult struct store execute summary result of gansible command
 type SumResult struct {
 	StartTime  time.Time
@@ -228,7 +236,7 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	execr := ExecResult{}
 	session, err := client.NewSession()
 	if err != nil {
-		execr.Status = "Failed"
+		execr.Status = StatusFailed
 		execr.RetrunCode = "1"
 		execr.Result = err.Error()
 	} else {
@@ -239,11 +247,11 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 		cmdNew := strings.Join(command, "&&")
 		out, err := session.CombinedOutput(cmdNew)
 		if err != nil {
-			execr.Status = "Failed"
+			execr.Status = StatusFailed
 			execr.RetrunCode = "1"
 			execr.Result = string(out)
 		} else {
-			execr.Status = "Success"
+			execr.Status = StatusSuccess
 			execr.RetrunCode = "0"
 			execr.Result = string(out)
 		}
@@ -256,7 +264,7 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	case <-ch:
 		return execr
 	case <-timer.C:
-		execr.Status = "Timeout"
+		execr.Status = StatusTimeout
 		execr.RetrunCode = "1"
 		execr.Result = fmt.Sprintf("Task not finished before %d seconds", timeout)
 		return execr
