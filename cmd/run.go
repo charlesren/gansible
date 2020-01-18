@@ -67,13 +67,13 @@ Default timeout of each task is 300 seconds.`,
 				var client *ssh.Client
 				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
 				if err != nil {
-					fmt.Println(err)
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
 					noder.Result.Out = err.Error()
 					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
 					fmt.Println(nrInfo)
+					fmt.Printf("\n")
 					wg.Done()
 				} else {
 					defer client.Close()
