@@ -310,3 +310,22 @@ func UploadFile(sftpClient *sftp.Client, srcFilePath string, destDir string) {
 	destFile.Write(c)
 	fmt.Println("copy file to remote server finished!")
 }
+
+//UploadDir upload local dir to dest dir of remote host
+func UploadDir(sftpClient *sftp.Client, srcDir string, destDir string) {
+	srcTargets, err := ioutil.ReadDir(srcDir)
+	if err != nil {
+		log.Fatal("read dir list fail ", err)
+	}
+	for _, srcTarget := range srcTargets {
+		srcTargetPath := path.Join(srcDir, srcTarget.Name())
+		destTargetPath := path.Join(destDir, srcTarget.Name())
+		if srcTarget.IsDir() {
+			sftpClient.Mkdir(destTargetPath)
+			UploadDir(sftpClient, srcTargetPath, destTargetPath)
+		} else {
+			UploadFile(sftpClient, path.Join(srcDir, srcTarget.Name()), destDir)
+		}
+	}
+	fmt.Println("copy directory to remote server finished!")
+}
