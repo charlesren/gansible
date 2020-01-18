@@ -71,17 +71,17 @@ Default timeout of each task is 300 seconds.`,
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
 					noder.Result.Out = err.Error()
-					execinfo := utils.ExecInfo(noder.Node, noder.Result)
+					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
-					fmt.Println(execinfo)
+					fmt.Println(nrInfo)
 					wg.Done()
 				} else {
 					defer client.Close()
 					timeout := 300
 					noder.Result = utils.Execute(client, commands, timeout)
-					execinfo := utils.ExecInfo(noder.Node, noder.Result)
+					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
-					fmt.Println(execinfo)
+					fmt.Println(nrInfo)
 					wg.Done()
 				}
 			})

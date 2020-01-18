@@ -15,11 +15,16 @@ import (
 )
 
 const (
-	StatusSuccess     string = "Success"
-	StatusFailed      string = "Failed"
+	//StatusSuccess ...
+	StatusSuccess string = "Success"
+	//StatusFailed ...
+	StatusFailed string = "Failed"
+	//StatusUnreachable ...
 	StatusUnreachable string = "Unreachable"
-	StatusSkiped      string = "Skipped"
-	StatusTimeout     string = "Timeout"
+	//StatusSkiped ...
+	StatusSkiped string = "Skipped"
+	//StatusTimeout ...
+	StatusTimeout string = "Timeout"
 )
 
 //ResultSum struct store execute summary result of gansible command
@@ -30,6 +35,12 @@ type ResultSum struct {
 	NodeResult []NodeResult
 }
 
+//NodeResult struct store task result
+type NodeResult struct {
+	Node   string
+	Result ExecResult
+}
+
 //ExecResult struct store command execute result
 type ExecResult struct {
 	Status     string
@@ -37,16 +48,10 @@ type ExecResult struct {
 	Out        string
 }
 
-//NodeResult struct store task result
-type NodeResult struct {
-	Node   string
-	Result ExecResult
-}
-
-//ExecInfo gengrate information of cmd result executed by ssh session
-func ExecInfo(host string, execr ExecResult) string {
-	execInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s", host, execr.Status, execr.RetrunCode, execr.Out)
-	return execInfo
+//NodeResultInfo gengrate information from NodeResult
+func NodeResultInfo(nodeResult NodeResult) string {
+	nrInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s", nodeResult.Node, nodeResult.Result.Status, nodeResult.Result.RetrunCode, nodeResult.Result.Out)
+	return nrInfo
 }
 
 //SumInfo gengrate summary of gansible result
