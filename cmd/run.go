@@ -99,7 +99,6 @@ Default timeout of each task is 300 seconds.`,
 			wg.Wait()
 		}
 		sumrinfo := utils.SumInfo(sumr)
-		fmt.Println(sumr.NodeResult)
 		fmt.Println(sumrinfo)
 	},
 }
