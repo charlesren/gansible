@@ -27,19 +27,25 @@ type SumResult struct {
 	StartTime  time.Time
 	EndTime    time.Time
 	CostTime   time.Duration
-	ExecResult []ExecResult
+	NodeResult []NodeResult
 }
 
 //ExecResult struct store command execute result
 type ExecResult struct {
 	Status     string
 	RetrunCode string
-	Result     string
+	Out        string
+}
+
+//NodeResult struct store task result
+type NodeResult struct {
+	Node   string
+	Result ExecResult
 }
 
 //ExecInfo gengrate information of cmd result executed by ssh session
 func ExecInfo(host string, execr ExecResult) string {
-	execInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s", host, execr.Status, execr.RetrunCode, execr.Result)
+	execInfo := fmt.Sprintf("%s | %s | rc=%s >>\n%s", host, execr.Status, execr.RetrunCode, execr.Out)
 	return execInfo
 }
 
@@ -50,19 +56,19 @@ func SumInfo(sumr SumResult) string {
 	endTimeStr := sumr.EndTime.Format("2006-01-02 15:04:05")
 	costTimeStr := sumr.CostTime.String()
 	//totalNum := len(sumr.Failed) + len(sumr.Success) + len(sumr.Unreachable) + len(sumr.Skiped)
-	totalNum := len(sumr.ExecResult)
+	totalNum := len(sumr.NodeResult)
 	successNum := 0
 	failedNum := 0
 	unreachableNum := 0
 	skippedNum := 0
-	for _, r := range sumr.ExecResult {
-		if r.Status == "Success" {
+	for _, r := range sumr.NodeResult {
+		if r.Result.Status == "Success" {
 			successNum++
-		} else if r.Status == "Failed" {
+		} else if r.Result.Status == "Failed" {
 			failedNum++
-		} else if r.Status == "Unreachable" {
+		} else if r.Result.Status == "Unreachable" {
 			unreachableNum++
-		} else if r.Status == "Skipped" {
+		} else if r.Result.Status == "Skipped" {
 			skippedNum++
 		}
 	}
@@ -238,7 +244,7 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	if err != nil {
 		execr.Status = StatusFailed
 		execr.RetrunCode = "1"
-		execr.Result = err.Error()
+		execr.Out = err.Error()
 	} else {
 		defer session.Close()
 		//Exec cmd then quit
@@ -249,11 +255,11 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 		if err != nil {
 			execr.Status = StatusFailed
 			execr.RetrunCode = "1"
-			execr.Result = string(out)
+			execr.Out = string(out)
 		} else {
 			execr.Status = StatusSuccess
 			execr.RetrunCode = "0"
-			execr.Result = string(out)
+			execr.Out = string(out)
 		}
 	}
 	//send ExecResult
@@ -266,7 +272,7 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	case <-timer.C:
 		execr.Status = StatusTimeout
 		execr.RetrunCode = "1"
-		execr.Result = fmt.Sprintf("Task not finished before %d seconds", timeout)
+		execr.Out = fmt.Sprintf("Task not finished before %d seconds", timeout)
 		return execr
 	}
 }

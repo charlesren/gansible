@@ -56,30 +56,31 @@ Default timeout of each task is 300 seconds.`,
 				fmt.Println("Max forks is 10000")
 				return
 			}
-			result := make(chan utils.ExecResult, len(ip))
+			result := make(chan utils.NodeResult, len(ip))
 			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
-				execr := utils.ExecResult{}
 				h, ok := host.(string)
 				if !ok {
 					return
 				}
+				noder := utils.NodeResult{}
+				noder.Node = h
 				var client *ssh.Client
 				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
 				if err != nil {
 					fmt.Println(err)
-					execr.Status = "Unreachable"
-					execr.RetrunCode = "1"
-					execr.Result = err.Error()
-					execinfo := utils.ExecInfo(h, execr)
-					result <- execr
+					noder.Result.Status = "Unreachable"
+					noder.Result.RetrunCode = "1"
+					noder.Result.Out = err.Error()
+					execinfo := utils.ExecInfo(noder.Node, noder.Result)
+					result <- noder
 					fmt.Println(execinfo)
 					wg.Done()
 				} else {
 					defer client.Close()
 					timeout := 300
-					execr = utils.Execute(client, commands, timeout)
-					execinfo := utils.ExecInfo(h, execr)
-					result <- execr
+					noder.Result = utils.Execute(client, commands, timeout)
+					execinfo := utils.ExecInfo(noder.Node, noder.Result)
+					result <- noder
 					fmt.Println(execinfo)
 					wg.Done()
 				}
@@ -88,7 +89,7 @@ Default timeout of each task is 300 seconds.`,
 			go func() {
 				for i := 0; i <= len(ip); i++ {
 					t := <-result
-					sumr.ExecResult = append(sumr.ExecResult, t)
+					sumr.NodeResult = append(sumr.NodeResult, t)
 				}
 			}()
 			for _, host := range ip {
@@ -98,6 +99,7 @@ Default timeout of each task is 300 seconds.`,
 			wg.Wait()
 		}
 		sumrinfo := utils.SumInfo(sumr)
+		fmt.Println(sumr.NodeResult)
 		fmt.Println(sumrinfo)
 	},
 }
