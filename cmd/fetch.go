@@ -37,7 +37,6 @@ var fetchCmd = &cobra.Command{
 		fmt.Println("fetch called")
 		host := args[0]
 		fmt.Println("Host:", host)
-		passwords := []string{"abc", "passw0rd"}
 		var client *ssh.Client
 		var err error
 		for _, password := range passwords {
