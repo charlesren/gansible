@@ -287,6 +287,18 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 
 //UploadFile upload local file to dest dir of remote host
 func UploadFile(sftpClient *sftp.Client, srcFilePath string, destDir string) {
+	_, err := os.Stat(destDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err := sftpClient.MkdirAll(destDir)
+			if err != nil {
+				fmt.Println("create directory failed!")
+				log.Fatal(err)
+			}
+		} else {
+			log.Fatal(err)
+		}
+	}
 	srcFile, err := os.Open(srcFilePath)
 	if err != nil {
 		fmt.Println("os.Open error : ", srcFilePath)
@@ -321,7 +333,11 @@ func UploadDir(sftpClient *sftp.Client, srcDir string, destDir string) {
 		srcTargetPath := path.Join(srcDir, srcTarget.Name())
 		destTargetPath := path.Join(destDir, srcTarget.Name())
 		if srcTarget.IsDir() {
-			sftpClient.Mkdir(destTargetPath)
+			err = sftpClient.MkdirAll(destTargetPath)
+			if err != nil {
+				fmt.Println("create directory failed!")
+				log.Fatal(err)
+			}
 			UploadDir(sftpClient, srcTargetPath, destTargetPath)
 		} else {
 			UploadFile(sftpClient, path.Join(srcDir, srcTarget.Name()), destDir)
