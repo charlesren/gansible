@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"gansible/pkg/autologin"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -69,16 +70,12 @@ var pushCmd = &cobra.Command{
 
 		}
 		defer destFile.Close()
-
-		buf := make([]byte, 1024)
-		for {
-			n, _ := srcFile.Read(buf)
-			if n == 0 {
-				break
-			}
-			destFile.Write(buf)
+		c, err := ioutil.ReadAll(srcFile)
+		if err != nil {
+			fmt.Println("ReadAll error : ", src)
+			log.Fatal(err)
 		}
-
+		destFile.Write(c)
 		fmt.Println("copy file to remote server finished!")
 	},
 }
