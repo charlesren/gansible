@@ -57,7 +57,6 @@ var scriptCmd = &cobra.Command{
 				if !ok {
 					return
 				}
-				passwords := []string{"abc", "passw0rd"}
 				var client *ssh.Client
 				var err error
 				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
