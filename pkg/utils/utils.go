@@ -3,14 +3,17 @@ package utils
 import (
 	"fmt"
 	"gansible/pkg/autologin"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -280,4 +283,30 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 		execr.Out = fmt.Sprintf("Task not finished before %d seconds", timeout)
 		return execr
 	}
+}
+
+//UploadFile upload local file to dest dir of remote host
+func UploadFile(sftpClient *sftp.Client, srcFilePath string, destDir string) {
+	srcFile, err := os.Open(srcFilePath)
+	if err != nil {
+		fmt.Println("os.Open error : ", srcFilePath)
+		log.Fatal(err)
+
+	}
+	defer srcFile.Close()
+	var destFileName = path.Base(srcFilePath)
+	destFile, err := sftpClient.Create(path.Join(destDir, destFileName))
+	if err != nil {
+		fmt.Println("sftpClient.Create error : ", path.Join(destDir, destFileName))
+		log.Fatal(err)
+
+	}
+	defer destFile.Close()
+	c, err := ioutil.ReadAll(srcFile)
+	if err != nil {
+		fmt.Println("ReadAll error : ", srcFilePath)
+		log.Fatal(err)
+	}
+	destFile.Write(c)
+	fmt.Println("copy file to remote server finished!")
 }

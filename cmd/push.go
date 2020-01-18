@@ -19,10 +19,8 @@ package cmd
 import (
 	"fmt"
 	"gansible/pkg/autologin"
-	"io/ioutil"
+	"gansible/pkg/utils"
 	"log"
-	"os"
-	"path"
 
 	"github.com/pkg/sftp"
 	"github.com/spf13/cobra"
@@ -55,28 +53,7 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		srcFile, err := os.Open(src)
-		if err != nil {
-			fmt.Println("os.Open error : ", src)
-			log.Fatal(err)
-
-		}
-		defer srcFile.Close()
-		var destFileName = path.Base(src)
-		destFile, err := sftpClient.Create(path.Join(dest, destFileName))
-		if err != nil {
-			fmt.Println("sftpClient.Create error : ", path.Join(dest, destFileName))
-			log.Fatal(err)
-
-		}
-		defer destFile.Close()
-		c, err := ioutil.ReadAll(srcFile)
-		if err != nil {
-			fmt.Println("ReadAll error : ", src)
-			log.Fatal(err)
-		}
-		destFile.Write(c)
-		fmt.Println("copy file to remote server finished!")
+		utils.UploadFile(sftpClient, src, dest)
 	},
 }
 
