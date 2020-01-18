@@ -22,8 +22,8 @@ const (
 	StatusTimeout     string = "Timeout"
 )
 
-//SumResult struct store execute summary result of gansible command
-type SumResult struct {
+//ResultSum struct store execute summary result of gansible command
+type ResultSum struct {
 	StartTime  time.Time
 	EndTime    time.Time
 	CostTime   time.Duration
@@ -50,7 +50,7 @@ func ExecInfo(host string, execr ExecResult) string {
 }
 
 //SumInfo gengrate summary of gansible result
-func SumInfo(sumr SumResult) string {
+func SumInfo(sumr ResultSum) string {
 	sumr.EndTime = time.Now()
 	sumr.CostTime = sumr.EndTime.Sub(sumr.StartTime)
 	endTimeStr := sumr.EndTime.Format("2006-01-02 15:04:05")

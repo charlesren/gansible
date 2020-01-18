@@ -40,7 +40,7 @@ var runCmd = &cobra.Command{
 Default timeout of each task is 300 seconds.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		var sumr utils.SumResult
+		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
 		//get ip form hosts var
 		ip, err := utils.ParseIPStr(hosts)
