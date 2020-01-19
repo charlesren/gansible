@@ -307,8 +307,8 @@ func UploadFile(sftpClient *sftp.Client, srcFilePath string, destDir string) {
 		fmt.Println("ReadAll error : ", srcFilePath)
 		log.Fatal(err)
 	}
+	fmt.Println(srcFilePath)
 	destFile.Write(c)
-	fmt.Println("copy file to remote server finished!")
 }
 
 //UploadDir upload local dir to dest dir of remote host
@@ -331,7 +331,6 @@ func UploadDir(sftpClient *sftp.Client, srcDir string, destDir string) {
 			UploadFile(sftpClient, path.Join(srcDir, srcTarget.Name()), destDir)
 		}
 	}
-	fmt.Println("copy directory to remote server finished!")
 }
 
 //Upload func upload file or directory to dest dir
@@ -356,9 +355,11 @@ func Upload(sftpClient *sftp.Client, src string, dest string) {
 			log.Fatal(fmt.Errorf("%s is not directory", dest))
 		}
 	}
+	fmt.Println("Upload in progress...")
 	if srcInfo.IsDir() {
 		UploadDir(sftpClient, src, dest)
 	} else {
 		UploadFile(sftpClient, src, dest)
 	}
+	fmt.Println("Upload finished!!!")
 }
