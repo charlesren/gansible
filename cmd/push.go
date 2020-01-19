@@ -52,7 +52,7 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		utils.UploadFile(sftpClient, src, dest)
+		utils.Upload(sftpClient, src, dest)
 	},
 }
 
