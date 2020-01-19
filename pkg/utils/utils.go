@@ -286,36 +286,48 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 }
 
 //UploadFile upload local file to dest dir of remote host
-func UploadFile(sftpClient *sftp.Client, srcFilePath string, destDir string) {
+func UploadFile(sftpClient *sftp.Client, srcFilePath string, destDir string) ExecResult {
+	execr := ExecResult{}
 	srcFile, err := os.Open(srcFilePath)
 	if err != nil {
-		fmt.Println("os.Open error : ", srcFilePath)
-		log.Fatal(err)
-
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
 	}
 	defer srcFile.Close()
 	var destFileName = path.Base(srcFilePath)
 	destFile, err := sftpClient.Create(path.Join(destDir, destFileName))
 	if err != nil {
-		fmt.Println("sftpClient.Create error : ", path.Join(destDir, destFileName))
-		log.Fatal(err)
-
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
 	}
 	defer destFile.Close()
 	c, err := ioutil.ReadAll(srcFile)
 	if err != nil {
-		fmt.Println("ReadAll error : ", srcFilePath)
-		log.Fatal(err)
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
 	}
-	fmt.Println(srcFilePath)
 	destFile.Write(c)
+	execr.Status = StatusSuccess
+	execr.RetrunCode = "0"
+	execr.Out = "upload successfully!"
+	return execr
 }
 
 //UploadDir upload local dir to dest dir of remote host
-func UploadDir(sftpClient *sftp.Client, srcDir string, destDir string) {
+func UploadDir(sftpClient *sftp.Client, srcDir string, destDir string) ExecResult {
+	execr := ExecResult{}
 	srcTargets, err := ioutil.ReadDir(srcDir)
 	if err != nil {
-		log.Fatal("read dir list fail ", err)
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
 	}
 	for _, srcTarget := range srcTargets {
 		srcTargetPath := path.Join(srcDir, srcTarget.Name())
@@ -323,43 +335,57 @@ func UploadDir(sftpClient *sftp.Client, srcDir string, destDir string) {
 		if srcTarget.IsDir() {
 			err = sftpClient.MkdirAll(destTargetPath)
 			if err != nil {
-				fmt.Println("create directory failed!")
-				log.Fatal(err)
+				execr.Status = StatusFailed
+				execr.RetrunCode = "1"
+				execr.Out = err.Error()
+				return execr
 			}
-			UploadDir(sftpClient, srcTargetPath, destTargetPath)
+			execr = UploadDir(sftpClient, srcTargetPath, destTargetPath)
 		} else {
-			UploadFile(sftpClient, path.Join(srcDir, srcTarget.Name()), destDir)
+			execr = UploadFile(sftpClient, path.Join(srcDir, srcTarget.Name()), destDir)
 		}
 	}
+	return execr
 }
 
 //Upload func upload file or directory to dest dir
-func Upload(sftpClient *sftp.Client, src string, dest string) {
+func Upload(sftpClient *sftp.Client, src string, dest string) ExecResult {
+	execr := ExecResult{}
 	srcInfo, err := os.Stat(src)
 	if err != nil {
-		log.Fatal(err)
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
 	}
 	destInfo, err := os.Stat(dest)
 	if err != nil {
 		if os.IsNotExist(err) {
 			err := sftpClient.MkdirAll(dest)
 			if err != nil {
-				fmt.Println("create directory failed!")
-				log.Fatal(err)
+				execr.Status = StatusFailed
+				execr.RetrunCode = "1"
+				execr.Out = err.Error()
+				return execr
 			}
 		} else {
-			log.Fatal(err)
+			execr.Status = StatusFailed
+			execr.RetrunCode = "1"
+			execr.Out = err.Error()
+			return execr
 		}
 	} else {
 		if !destInfo.IsDir() {
-			log.Fatal(fmt.Errorf("%s is not directory", dest))
+			execr.Status = StatusFailed
+			execr.RetrunCode = "1"
+			execr.Out = fmt.Sprintf("%s is not directory", dest)
+			return execr
 		}
 	}
-	fmt.Println("Upload in progress...")
 	if srcInfo.IsDir() {
-		UploadDir(sftpClient, src, dest)
+		execr = UploadDir(sftpClient, src, dest)
 	} else {
-		UploadFile(sftpClient, src, dest)
+		execr = UploadFile(sftpClient, src, dest)
 	}
-	fmt.Println("Upload finished!!!")
+	return execr
 }

@@ -19,7 +19,6 @@ package cmd
 import (
 	"fmt"
 	"gansible/pkg/utils"
-	"log"
 	"time"
 
 	"github.com/panjf2000/ants/v2"
@@ -39,7 +38,6 @@ var pushCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
-		fmt.Println("push called")
 		ip, err := utils.ParseIPStr(hosts)
 		if err != nil {
 			fmt.Println(err)
@@ -77,12 +75,20 @@ var pushCmd = &cobra.Command{
 					var sftpClient *sftp.Client
 					sftpClient, err = sftp.NewClient(client)
 					if err != nil {
-						log.Fatal(err)
+						noder.Result.Status = "Unreachable"
+						noder.Result.RetrunCode = "1"
+						noder.Result.Out = err.Error()
+						nrInfo := utils.NodeResultInfo(noder)
+						result <- noder
+						fmt.Println(nrInfo)
+						fmt.Printf("\n")
+						wg.Done()
 					}
-					utils.Upload(sftpClient, src, dest)
+					noder.Result = utils.Upload(sftpClient, src, dest)
 					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
 					fmt.Println(nrInfo)
+					fmt.Printf("\n")
 					wg.Done()
 				}
 			})
