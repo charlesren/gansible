@@ -18,10 +18,11 @@ package cmd
 
 import (
 	"fmt"
-	"gansible/pkg/autologin"
 	"gansible/pkg/utils"
 	"log"
+	"time"
 
+	"github.com/panjf2000/ants/v2"
 	"github.com/pkg/sftp"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
@@ -36,23 +37,70 @@ var pushCmd = &cobra.Command{
 	Short: "Upload file to remote host",
 	Long:  `Upload file to remote host.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var sumr utils.ResultSum
+		sumr.StartTime = time.Now()
 		fmt.Println("push called")
-		host := args[0]
-		fmt.Println("Host:", host)
-		var client *ssh.Client
-		var err error
-		for _, password := range passwords {
-			if client, err = autologin.Connect("root", password, host, 22); err == nil {
-				break
-			}
-		}
-		defer client.Close()
-		var sftpClient *sftp.Client
-		sftpClient, err = sftp.NewClient(client)
+		ip, err := utils.ParseIPStr(hosts)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
 		}
-		utils.Upload(sftpClient, src, dest)
+		if ip == nil {
+			fmt.Println("No hosts specified!")
+		} else {
+			if forks < 1 {
+				forks = 1
+			} else if forks > 10000 {
+				fmt.Println("Max forks is 10000")
+				return
+			}
+			result := make(chan utils.NodeResult, len(ip))
+			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
+				h, ok := host.(string)
+				if !ok {
+					return
+				}
+				noder := utils.NodeResult{}
+				noder.Node = h
+				var client *ssh.Client
+				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
+				if err != nil {
+					noder.Result.Status = "Unreachable"
+					noder.Result.RetrunCode = "1"
+					noder.Result.Out = err.Error()
+					nrInfo := utils.NodeResultInfo(noder)
+					result <- noder
+					fmt.Println(nrInfo)
+					fmt.Printf("\n")
+					wg.Done()
+				} else {
+					defer client.Close()
+					var sftpClient *sftp.Client
+					sftpClient, err = sftp.NewClient(client)
+					if err != nil {
+						log.Fatal(err)
+					}
+					utils.Upload(sftpClient, src, dest)
+					nrInfo := utils.NodeResultInfo(noder)
+					result <- noder
+					fmt.Println(nrInfo)
+					wg.Done()
+				}
+			})
+			defer p.Release()
+			go func() {
+				for i := 0; i <= len(ip); i++ {
+					t := <-result
+					sumr.NodeResult = append(sumr.NodeResult, t)
+				}
+			}()
+			for _, host := range ip {
+				wg.Add(1)
+				p.Invoke(host)
+			}
+			wg.Wait()
+		}
+		sumrinfo := utils.SumInfo(sumr)
+		fmt.Println(sumrinfo)
 	},
 }
 
@@ -72,4 +120,6 @@ func init() {
 	pushCmd.MarkFlagRequired("src")
 	pushCmd.Flags().StringVarP(&dest, "dest", "d", "", "Destination file or directory")
 	pushCmd.MarkFlagRequired("dest")
+	pushCmd.Flags().StringVarP(&hosts, "hosts", "H", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	pushCmd.MarkFlagRequired("hosts")
 }
