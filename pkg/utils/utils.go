@@ -389,3 +389,106 @@ func Upload(sftpClient *sftp.Client, src string, dest string) ExecResult {
 	}
 	return execr
 }
+
+//DownloadFile download remote file to local dir
+func DownloadFile(sftpClient *sftp.Client, srcFilePath string, destDir string) ExecResult {
+	execr := ExecResult{}
+	srcFile, err := sftpClient.Open(srcFilePath)
+	if err != nil {
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
+	}
+	defer srcFile.Close()
+	var destFileName = path.Base(srcFilePath)
+	destFile, err := sftpClient.Create(path.Join(destDir, destFileName))
+	if err != nil {
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
+	}
+	defer destFile.Close()
+	if _, err = srcFile.WriteTo(destFile); err != nil {
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
+	}
+	execr.Status = StatusSuccess
+	execr.RetrunCode = "0"
+	execr.Out = "upload successfully!"
+	return execr
+}
+
+//DownloadDir Download remote dir to local dir
+func DownloadDir(sftpClient *sftp.Client, srcDir string, destDir string) ExecResult {
+	execr := ExecResult{}
+	srcTargets, err := sftpClient.ReadDir(srcDir)
+	if err != nil {
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
+	}
+	for _, srcTarget := range srcTargets {
+		srcTargetPath := path.Join(srcDir, srcTarget.Name())
+		destTargetPath := path.Join(destDir, srcTarget.Name())
+		if srcTarget.IsDir() {
+			err = os.MkdirAll(destTargetPath, os.ModePerm)
+			if err != nil {
+				execr.Status = StatusFailed
+				execr.RetrunCode = "1"
+				execr.Out = err.Error()
+				return execr
+			}
+			execr = DownloadDir(sftpClient, srcTargetPath, destTargetPath)
+		} else {
+			execr = DownloadFile(sftpClient, path.Join(srcDir, srcTarget.Name()), destDir)
+		}
+	}
+	return execr
+}
+
+//Download func Download file or directory to dest dir
+func Download(sftpClient *sftp.Client, src string, dest string) ExecResult {
+	execr := ExecResult{}
+	srcInfo, err := sftpClient.Stat(src)
+	if err != nil {
+		execr.Status = StatusFailed
+		execr.RetrunCode = "1"
+		execr.Out = err.Error()
+		return execr
+	}
+	destInfo, err := os.Stat(dest)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err := os.MkdirAll(dest, os.ModePerm)
+			if err != nil {
+				execr.Status = StatusFailed
+				execr.RetrunCode = "1"
+				execr.Out = err.Error()
+				return execr
+			}
+		} else {
+			execr.Status = StatusFailed
+			execr.RetrunCode = "1"
+			execr.Out = err.Error()
+			return execr
+		}
+	} else {
+		if !destInfo.IsDir() {
+			execr.Status = StatusFailed
+			execr.RetrunCode = "1"
+			execr.Out = fmt.Sprintf("%s is not directory", dest)
+			return execr
+		}
+	}
+	if srcInfo.IsDir() {
+		//execr = UploadDir(sftpClient, src, dest)
+	} else {
+		execr = DownloadFile(sftpClient, src, dest)
+	}
+	return execr
+}
