@@ -30,6 +30,7 @@ import (
 )
 
 var dir string
+var scriptArgs string
 
 // scriptCmd represents the script command
 var scriptCmd = &cobra.Command{
@@ -88,6 +89,9 @@ var scriptCmd = &cobra.Command{
 					var destFileName = path.Base(scriptFile)
 					destFilePath := path.Join("/tmp", destFileName)
 					cmd := "sh " + destFilePath
+					if scriptArgs != "" {
+						cmd = cmd + " " + scriptArgs
+					}
 					if dir != "" {
 						cmd = "cd " + dir + ";" + cmd
 					}
@@ -129,6 +133,7 @@ func init() {
 	// is called directly, e.g.:
 	// scriptCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	scriptCmd.Flags().StringVarP(&dir, "dir", "d", "", "run script at designated dir")
+	scriptCmd.Flags().StringVarP(&scriptArgs, "args", "a", "", "args for script")
 	scriptCmd.Flags().StringVarP(&hosts, "hosts", "H", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
 	scriptCmd.MarkFlagRequired("hosts")
 }
