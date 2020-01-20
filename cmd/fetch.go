@@ -19,6 +19,8 @@ package cmd
 import (
 	"fmt"
 	"gansible/pkg/utils"
+	"path"
+	"reflect"
 	"time"
 
 	"github.com/panjf2000/ants/v2"
@@ -81,7 +83,7 @@ var fetchCmd = &cobra.Command{
 						fmt.Printf("\n")
 						wg.Done()
 					}
-					noder.Result = utils.Download(sftpClient, src, dest)
+					noder.Result = utils.Download(sftpClient, src, path.Join(dest, reflect.ValueOf(host).String()))
 					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
 					fmt.Println(nrInfo)
