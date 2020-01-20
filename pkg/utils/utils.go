@@ -486,7 +486,7 @@ func Download(sftpClient *sftp.Client, src string, dest string) ExecResult {
 		}
 	}
 	if srcInfo.IsDir() {
-		//execr = UploadDir(sftpClient, src, dest)
+		execr = DownloadDir(sftpClient, src, dest)
 	} else {
 		execr = DownloadFile(sftpClient, src, dest)
 	}
