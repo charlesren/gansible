@@ -52,14 +52,10 @@ var fetchCmd = &cobra.Command{
 			}
 			result := make(chan utils.NodeResult, len(ip))
 			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
-				h, ok := host.(string)
-				if !ok {
-					return
-				}
 				noder := utils.NodeResult{}
-				noder.Node = h
+				noder.Node = reflect.ValueOf(host).String()
 				var client *ssh.Client
-				client, err = utils.TryPasswords("root", passwords, h, 22, 30)
+				client, err = utils.TryPasswords("root", passwords, reflect.ValueOf(host).String(), 22, 30)
 				if err != nil {
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
