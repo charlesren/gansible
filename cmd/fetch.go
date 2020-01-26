@@ -37,12 +37,12 @@ var fetchCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
-		ip, err := utils.ParseIPStr(hosts)
+		ip, err := utils.ParseIPStr(nodes)
 		if err != nil {
 			fmt.Println(err)
 		}
 		if ip == nil {
-			fmt.Println("No hosts specified!")
+			fmt.Println("No node specified!")
 		} else {
 			if forks < 1 {
 				forks = 1
@@ -121,6 +121,6 @@ func init() {
 	fetchCmd.MarkFlagRequired("src")
 	fetchCmd.Flags().StringVarP(&dest, "dest", "d", "", "Destination file or directory")
 	fetchCmd.MarkFlagRequired("dest")
-	fetchCmd.Flags().StringVarP(&hosts, "hosts", "H", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
-	fetchCmd.MarkFlagRequired("hosts")
+	fetchCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	fetchCmd.MarkFlagRequired("nodes")
 }

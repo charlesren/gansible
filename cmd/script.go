@@ -42,12 +42,12 @@ var scriptCmd = &cobra.Command{
 		scriptFile := args[0]
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
-		ip, err := utils.ParseIPStr(hosts)
+		ip, err := utils.ParseIPStr(nodes)
 		if err != nil {
 			fmt.Println(err)
 		}
 		if ip == nil {
-			fmt.Println("No hosts specified!")
+			fmt.Println("No node specified!")
 		} else {
 			if forks < 1 {
 				forks = 1
@@ -134,6 +134,6 @@ func init() {
 	// scriptCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	scriptCmd.Flags().StringVarP(&dir, "dir", "d", "", "run script at designated dir")
 	scriptCmd.Flags().StringVarP(&scriptArgs, "args", "a", "", "args for script")
-	scriptCmd.Flags().StringVarP(&hosts, "hosts", "H", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
-	scriptCmd.MarkFlagRequired("hosts")
+	scriptCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	scriptCmd.MarkFlagRequired("nodes")
 }
