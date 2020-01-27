@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bufio"
 	"fmt"
 	"gansible/pkg/autologin"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"net"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -206,6 +208,57 @@ func inc(ip net.IP) {
 			break
 		}
 	}
+}
+
+//ParseIPFile read given file then store proper ips into []sting
+func ParseIPFile(ipFile string) ([]string, error) {
+	ip := []string{}
+	var err error
+	if ipFile != "" {
+		ipFile, err = filepath.Abs(ipFile)
+		if err != nil {
+			log.Printf("get %s filepath err: %s ", ipFile, err)
+			return nil, err
+		}
+		file, err := os.Open(ipFile)
+		if err != nil {
+			log.Printf("can not open file: %s, err: [%v]", ipFile, err)
+			return nil, err
+		}
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			tempip, err := ParseIPStr(scanner.Text())
+			if err != nil {
+				log.Printf("parse ip from file error line: %s  err: [%v]", scanner.Text(), err)
+				return nil, err
+			}
+			ip = append(ip, tempip...)
+		}
+		if err := scanner.Err(); err != nil {
+			log.Printf("Cannot scanner file: %s, err: [%v]", ipFile, err)
+			return nil, err
+		}
+	}
+	return ip, nil
+}
+
+//ParseIP parse ip file and ip string use ParseIPFile and ParseStr func then store proper ips into []sting
+func ParseIP(ipFile, ipStr string) ([]string, error) {
+	ip := []string{}
+	strip, err := ParseIPStr(ipStr)
+	if err != nil {
+		log.Printf("parse ip form string %s err: %s ", ipStr, err)
+		return nil, err
+	}
+	ip = append(ip, strip...)
+	fileip, err := ParseIPFile(ipFile)
+	if err != nil {
+		log.Printf("parse ip form file %s err: %s ", ipFile, err)
+		return nil, err
+	}
+	ip = append(ip, fileip...)
+	return ip, nil
 }
 
 //TryPasswords ssh to a machine using a set of possible passwords concurrently.
