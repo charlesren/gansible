@@ -42,7 +42,7 @@ var scriptCmd = &cobra.Command{
 		scriptFile := args[0]
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
-		ip, err := utils.ParseIPStr(nodes)
+		ip, err := utils.ParseIP(nodefile, nodes)
 		if err != nil {
 			fmt.Println(err)
 		}

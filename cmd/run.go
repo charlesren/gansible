@@ -42,7 +42,7 @@ Default timeout of each task is 300 seconds.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
-		ip, err := utils.ParseIPStr(nodes)
+		ip, err := utils.ParseIP(nodefile, nodes)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -112,7 +112,7 @@ func init() {
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	runCmd.Flags().StringVarP(&commands, "commands", "c", "", "separate multiple command with semicolons(eg: pwd;ls)")
 	runCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	runCmd.Flags().StringVarP(&nodefile, "nodefile", "f", "", "path to nodefile ,eg: /tmp/ipfile.txt  or ./ipfile.txt")
 	runCmd.Flags().IntVarP(&timeout, "timeout", "", 300, "task should finished before timeout")
 	runCmd.MarkFlagRequired("commands")
-	runCmd.MarkFlagRequired("nodes")
 }

@@ -37,7 +37,7 @@ var fetchCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
-		ip, err := utils.ParseIPStr(nodes)
+		ip, err := utils.ParseIP(nodefile, nodes)
 		if err != nil {
 			fmt.Println(err)
 		}
