@@ -82,7 +82,7 @@ func SumInfo(sumr ResultSum) string {
 			skippedNum++
 		}
 	}
-	sumi := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d", endTimeStr, costTimeStr, totalNum, successNum, failedNum, unreachableNum, skippedNum)
+	sumi := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d\n", endTimeStr, costTimeStr, totalNum, successNum, failedNum, unreachableNum, skippedNum)
 	return sumi
 }
 
@@ -99,6 +99,34 @@ func AppendToFile(file string, str string) error {
 		log.Fatal(err)
 	}
 	return f.Sync()
+}
+
+//Loging save gansible command result to log file
+func Loging(sumr ResultSum, logFileName string, logFileFormat string, logDir string) {
+	if logFileName == "" {
+		logFileName = fmt.Sprintf("gansible_%s", sumr.StartTime.Format("2006-01-02_15:04:05"))
+	}
+	if logDir == "" {
+		logDir = os.TempDir()
+	}
+	logfile := path.Join(logDir, logFileName+"."+logFileFormat)
+	switch logFileFormat {
+	case "log":
+		var nrInfo string
+		for _, noder := range sumr.NodeResult {
+			nr := NodeResultInfo(noder)
+			nrInfo = nrInfo + nr
+		}
+		suminfo := SumInfo(sumr)
+		info := nrInfo + suminfo
+		err := AppendToFile(logfile, info)
+		if err != nil {
+			fmt.Printf("loging failed err: %s", err)
+		}
+		fmt.Printf("save log to file: %s successfully!\n", logfile)
+	default:
+		fmt.Printf("incorrect file format!\n")
+	}
 }
 
 //ParseIPStr parse  given string then store proper ips into []sting
