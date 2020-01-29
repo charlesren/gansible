@@ -37,7 +37,6 @@ var scriptCmd = &cobra.Command{
 	Use:   "script",
 	Short: "Run local script on remote hosts",
 	Long:  `Run local script on remote hosts.`,
-	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		scriptFile := args[0]
 		var sumr utils.ResultSum
@@ -117,6 +116,9 @@ var scriptCmd = &cobra.Command{
 		}
 		sumrinfo := utils.SumInfo(sumr)
 		fmt.Println(sumrinfo)
+		if loging {
+			utils.Loging(sumr, logFileName, logFileFormat, logDir)
+		}
 	},
 }
 

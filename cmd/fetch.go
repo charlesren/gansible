@@ -102,6 +102,9 @@ var fetchCmd = &cobra.Command{
 		}
 		sumrinfo := utils.SumInfo(sumr)
 		fmt.Println(sumrinfo)
+		if loging {
+			utils.Loging(sumr, logFileName, logFileFormat, logDir)
+		}
 	},
 }
 
