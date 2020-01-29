@@ -29,8 +29,12 @@ import (
 var cfgFile string
 var forks int
 var nodes string
-var nodefile string
+var nodeFile string
 var passwords = []string{"abc", "passw0rd"}
+var loging bool
+var logDir string
+var logFileName string
+var logFileFormat string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

@@ -42,7 +42,7 @@ var scriptCmd = &cobra.Command{
 		scriptFile := args[0]
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
-		ip, err := utils.ParseIP(nodefile, nodes)
+		ip, err := utils.ParseIP(nodeFile, nodes)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -135,5 +135,5 @@ func init() {
 	scriptCmd.Flags().StringVarP(&dir, "dir", "d", "", "run script at designated dir")
 	scriptCmd.Flags().StringVarP(&scriptArgs, "args", "a", "", "args for script")
 	scriptCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
-	scriptCmd.MarkFlagRequired("nodes")
+	runCmd.Flags().StringVarP(&nodeFile, "nodefile", "f", "", "eg: /path/to/nodefile.txt  or ./nodefile.txt")
 }
