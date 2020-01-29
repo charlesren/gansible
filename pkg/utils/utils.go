@@ -143,6 +143,18 @@ func Loging(sumr ResultSum, logFileName string, logFileFormat string, logDir str
 			fmt.Printf("loging failed err: %s", err)
 		}
 		fmt.Printf("save log to file: %s successfully!\n", logfile)
+	case "json":
+		jsonInfo, err := json.Marshal(sumr)
+		if err != nil {
+			fmt.Println("marshal node result error:", err)
+			return
+		}
+		info := string(jsonInfo)
+		err = AppendToFile(logfile, info)
+		if err != nil {
+			fmt.Printf("loging failed err: %s", err)
+		}
+		fmt.Printf("save log to file: %s successfully!\n", logfile)
 	default:
 		fmt.Printf("incorrect file format!\n")
 	}
