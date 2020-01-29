@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"gansible/pkg/autologin"
 	"io/ioutil"
@@ -92,6 +93,13 @@ func PrintNodeResult(noder NodeResult, outputFormat string) {
 	case "gansible":
 		nrInfo := NodeResultInfo(noder)
 		fmt.Println(nrInfo)
+	case "json":
+		nrInfo, err := json.Marshal(noder)
+		if err != nil {
+			fmt.Println("marshal node result error:", err)
+			return
+		}
+		fmt.Println(string(nrInfo))
 	default:
 		fmt.Println("incorrect output format")
 	}
