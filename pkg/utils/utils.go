@@ -86,6 +86,17 @@ func SumInfo(sumr ResultSum) string {
 	return sumi
 }
 
+//PrintNodeResult print node result to standout
+func PrintNodeResult(noder NodeResult, outputFormat string) {
+	switch outputFormat {
+	case "gansible":
+		nrInfo := NodeResultInfo(noder)
+		fmt.Println(nrInfo)
+	default:
+		fmt.Println("incorrect output format")
+	}
+}
+
 // AppendToFile will print any string of text to a file safely by
 // checking for errors and syncing at the end.
 func AppendToFile(file string, str string) error {
