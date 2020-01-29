@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"gansible/pkg/autologin"
@@ -148,7 +149,8 @@ func Loging(sumr ResultSum, logFileName string, logFileFormat string, logDir str
 		info := nrInfo + suminfo
 		err := AppendToFile(logfile, info)
 		if err != nil {
-			fmt.Printf("loging failed err: %s", err)
+			fmt.Println("loging failed err:", err)
+			return
 		}
 		fmt.Printf("save log to file: %s successfully!\n", logfile)
 	case "json":
@@ -160,7 +162,8 @@ func Loging(sumr ResultSum, logFileName string, logFileFormat string, logDir str
 		info := string(jsonInfo)
 		err = AppendToFile(logfile, info)
 		if err != nil {
-			fmt.Printf("loging failed err: %s", err)
+			fmt.Println("loging failed err:", err)
+			return
 		}
 		fmt.Printf("save log to file: %s successfully!\n", logfile)
 	case "yaml":
@@ -172,7 +175,34 @@ func Loging(sumr ResultSum, logFileName string, logFileFormat string, logDir str
 		info := string(yamlInfo)
 		err = AppendToFile(logfile, info)
 		if err != nil {
-			fmt.Printf("loging failed err: %s", err)
+			fmt.Println("loging failed err:", err)
+			return
+		}
+		fmt.Printf("save log to file: %s successfully!\n", logfile)
+	case "csv":
+		logFileObj, err := os.Create(logfile)
+		if err != nil {
+			fmt.Println("create log file error:", err)
+			return
+		}
+		defer logFileObj.Close()
+		title := []string{"Node", "Status", "ReturnCode", "Out"}
+		w := csv.NewWriter(logFileObj)
+		if err := w.Write(title); err != nil {
+			fmt.Println("error writing title to csv:", err)
+			return
+		}
+		for _, nr := range sumr.NodeResult {
+			record := []string{nr.Node, nr.Result.Status, nr.Result.RetrunCode, nr.Result.Out}
+			if err := w.Write(record); err != nil {
+				fmt.Println("error writing record to csv:", err)
+				return
+			}
+		}
+		w.Flush()
+		if err := w.Error(); err != nil {
+			fmt.Println("loging failed err:", err)
+			return
 		}
 		fmt.Printf("save log to file: %s successfully!\n", logfile)
 	default:
