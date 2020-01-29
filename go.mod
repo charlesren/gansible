@@ -9,4 +9,5 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.6.1
 	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413
+	gopkg.in/yaml.v2 v2.2.4
 )

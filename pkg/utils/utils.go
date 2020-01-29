@@ -18,6 +18,7 @@ import (
 
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -95,6 +96,13 @@ func PrintNodeResult(noder NodeResult, outputFormat string) {
 		fmt.Println(nrInfo)
 	case "json":
 		nrInfo, err := json.Marshal(noder)
+		if err != nil {
+			fmt.Println("marshal node result error:", err)
+			return
+		}
+		fmt.Println(string(nrInfo))
+	case "yaml":
+		nrInfo, err := yaml.Marshal(noder)
 		if err != nil {
 			fmt.Println("marshal node result error:", err)
 			return
