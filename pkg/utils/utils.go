@@ -90,8 +90,8 @@ func SumInfo(sumr ResultSum) string {
 }
 
 //PrintNodeResult print node result to standout
-func PrintNodeResult(noder NodeResult, outputFormat string) {
-	switch outputFormat {
+func PrintNodeResult(noder NodeResult, outputStyle string) {
+	switch outputStyle {
 	case "gansible":
 		nrInfo := NodeResultInfo(noder)
 		fmt.Println(nrInfo)
