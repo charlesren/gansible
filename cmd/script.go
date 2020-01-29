@@ -65,7 +65,7 @@ var scriptCmd = &cobra.Command{
 					noder.Result.RetrunCode = "1"
 					noder.Result.Out = err.Error()
 					result <- noder
-					utils.PrintNodeResult(noder, outputFormat)
+					utils.PrintNodeResult(noder, outputStyle)
 					wg.Done()
 				} else {
 					defer client.Close()
@@ -76,7 +76,7 @@ var scriptCmd = &cobra.Command{
 						noder.Result.RetrunCode = "1"
 						noder.Result.Out = err.Error()
 						result <- noder
-						utils.PrintNodeResult(noder, outputFormat)
+						utils.PrintNodeResult(noder, outputStyle)
 						wg.Done()
 					}
 					noder.Result = utils.Upload(sftpClient, scriptFile, "/tmp")

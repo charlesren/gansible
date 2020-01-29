@@ -61,7 +61,7 @@ var fetchCmd = &cobra.Command{
 					noder.Result.RetrunCode = "1"
 					noder.Result.Out = err.Error()
 					result <- noder
-					utils.PrintNodeResult(noder, outputFormat)
+					utils.PrintNodeResult(noder, outputStyle)
 					wg.Done()
 				} else {
 					defer client.Close()
@@ -72,12 +72,12 @@ var fetchCmd = &cobra.Command{
 						noder.Result.RetrunCode = "1"
 						noder.Result.Out = err.Error()
 						result <- noder
-						utils.PrintNodeResult(noder, outputFormat)
+						utils.PrintNodeResult(noder, outputStyle)
 						wg.Done()
 					}
 					noder.Result = utils.Download(sftpClient, src, path.Join(dest, reflect.ValueOf(host).String()))
 					result <- noder
-					utils.PrintNodeResult(noder, outputFormat)
+					utils.PrintNodeResult(noder, outputStyle)
 					wg.Done()
 				}
 			})

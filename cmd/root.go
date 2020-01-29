@@ -35,7 +35,7 @@ var loging bool
 var logDir string
 var logFileName string
 var logFileFormat string
-var outputFormat string
+var outputStyle string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -66,10 +66,10 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gansible.yaml)")
 	rootCmd.PersistentFlags().IntVar(&forks, "forks", 5, "number of concurrenrt tasks")
 	rootCmd.PersistentFlags().BoolVarP(&loging, "loging", "", false, "save result log")
-	rootCmd.PersistentFlags().StringVar(&logFileFormat, "log-file-format", "log", "log file format")
+	rootCmd.PersistentFlags().StringVar(&logFileFormat, "log-file-format", "log", "log file format: log/json/yaml/csv")
 	rootCmd.PersistentFlags().StringVar(&logDir, "log-dir", "", "dir to save log file")
-	rootCmd.PersistentFlags().StringVar(&logFileName, "log-file-name", "", "log file format")
-	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "gansible", "gansible output format")
+	rootCmd.PersistentFlags().StringVar(&logFileName, "log-file-name", "", "define name of log file")
+	rootCmd.PersistentFlags().StringVarP(&outputStyle, "output", "o", "gansible", "gansible output style: gansible/json/yaml")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
