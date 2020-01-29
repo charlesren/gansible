@@ -135,5 +135,5 @@ func init() {
 	scriptCmd.Flags().StringVarP(&dir, "dir", "d", "", "run script at designated dir")
 	scriptCmd.Flags().StringVarP(&scriptArgs, "args", "a", "", "args for script")
 	scriptCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
-	runCmd.Flags().StringVarP(&nodeFile, "nodefile", "f", "", "eg: /path/to/nodefile.txt  or ./nodefile.txt")
+	scriptCmd.Flags().StringVarP(&nodeFile, "nodefile", "f", "", "eg: /path/to/nodefile.txt  or ./nodefile.txt")
 }

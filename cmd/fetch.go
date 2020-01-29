@@ -122,5 +122,5 @@ func init() {
 	fetchCmd.Flags().StringVarP(&dest, "dest", "d", "", "Destination file or directory")
 	fetchCmd.MarkFlagRequired("dest")
 	fetchCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
-	runCmd.Flags().StringVarP(&nodeFile, "nodefile", "f", "", "eg: /path/to/nodefile.txt  or ./nodefile.txt")
+	fetchCmd.Flags().StringVarP(&nodeFile, "nodefile", "f", "", "eg: /path/to/nodefile.txt  or ./nodefile.txt")
 }
