@@ -62,10 +62,8 @@ var pushCmd = &cobra.Command{
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
 					noder.Result.Out = err.Error()
-					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
-					fmt.Println(nrInfo)
-					fmt.Printf("\n")
+					utils.PrintNodeResult(noder, outputFormat)
 					wg.Done()
 				} else {
 					defer client.Close()
@@ -75,17 +73,13 @@ var pushCmd = &cobra.Command{
 						noder.Result.Status = "Unreachable"
 						noder.Result.RetrunCode = "1"
 						noder.Result.Out = err.Error()
-						nrInfo := utils.NodeResultInfo(noder)
 						result <- noder
-						fmt.Println(nrInfo)
-						fmt.Printf("\n")
+						utils.PrintNodeResult(noder, outputFormat)
 						wg.Done()
 					}
 					noder.Result = utils.Upload(sftpClient, src, dest)
-					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
-					fmt.Println(nrInfo)
-					fmt.Printf("\n")
+					utils.PrintNodeResult(noder, outputFormat)
 					wg.Done()
 				}
 			})
