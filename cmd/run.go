@@ -96,7 +96,6 @@ Default timeout of each task is 300 seconds.`,
 		sumrinfo := utils.SumInfo(sumr)
 		fmt.Printf("%s", sumrinfo)
 		if loging {
-			logFileFormat = "log"
 			utils.Loging(sumr, logFileName, logFileFormat, logDir)
 		}
 	},
