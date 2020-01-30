@@ -36,6 +36,7 @@ var logDir string
 var logFileName string
 var logFileFormat string
 var outputStyle string
+var sshTimeout int
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -70,6 +71,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&logDir, "log-dir", "", "dir to save log file")
 	rootCmd.PersistentFlags().StringVar(&logFileName, "log-file-name", "", "define name of log file")
 	rootCmd.PersistentFlags().StringVarP(&outputStyle, "output", "o", "gansible", "gansible output style: gansible/json/yaml")
+	rootCmd.PersistentFlags().IntVar(&sshTimeout, "ssh-timeout", 30, "ssh to a node must be successful within timeout duration")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")

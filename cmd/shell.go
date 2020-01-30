@@ -36,7 +36,7 @@ var shellCmd = &cobra.Command{
 		host := args[0]
 		fmt.Println("Host:", host)
 		var client *ssh.Client
-		client, _ = utils.TryPasswords("root", passwords, host, 22, 30)
+		client, _ = utils.TryPasswords("root", passwords, host, 22, sshTimeout)
 		if client == nil {
 			fmt.Println("All passwords are wrong.")
 		} else {

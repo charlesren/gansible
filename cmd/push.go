@@ -57,7 +57,7 @@ var pushCmd = &cobra.Command{
 				noder := utils.NodeResult{}
 				noder.Node = reflect.ValueOf(host).String()
 				var client *ssh.Client
-				client, err = utils.TryPasswords("root", passwords, reflect.ValueOf(host).String(), 22, 30)
+				client, err = utils.TryPasswords("root", passwords, reflect.ValueOf(host).String(), 22, sshTimeout)
 				if err != nil {
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
