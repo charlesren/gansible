@@ -35,6 +35,7 @@ var fetchCmd = &cobra.Command{
 	Short: "Download file from remote host",
 	Long:  `Download file from remote host.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		passwords := utils.GetPassword(pwdFile)
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
 		ip, err := utils.ParseIP(nodeFile, nodes)

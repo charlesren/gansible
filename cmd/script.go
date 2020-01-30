@@ -38,6 +38,7 @@ var scriptCmd = &cobra.Command{
 	Short: "Run local script on remote hosts",
 	Long:  `Run local script on remote hosts.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		passwords := utils.GetPassword(pwdFile)
 		scriptFile := args[0]
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()

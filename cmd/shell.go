@@ -33,6 +33,7 @@ var shellCmd = &cobra.Command{
 	Long:  `Open a remote shell session to remote machine,so that you can execute command just like in localhost.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		passwords := utils.GetPassword(pwdFile)
 		host := args[0]
 		fmt.Println("Host:", host)
 		var client *ssh.Client

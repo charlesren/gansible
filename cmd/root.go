@@ -30,7 +30,6 @@ var cfgFile string
 var forks int
 var nodes string
 var nodeFile string
-var passwords = []string{}
 var loging bool
 var logDir string
 var logFileName string

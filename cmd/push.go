@@ -37,6 +37,7 @@ var pushCmd = &cobra.Command{
 	Short: "Upload file to remote host",
 	Long:  `Upload file to remote host.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		passwords := utils.GetPassword(pwdFile)
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
 		ip, err := utils.ParseIP(nodeFile, nodes)
