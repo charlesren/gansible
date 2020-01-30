@@ -30,13 +30,14 @@ var cfgFile string
 var forks int
 var nodes string
 var nodeFile string
-var passwords = []string{"abc", "passw0rd"}
+var passwords = []string{}
 var loging bool
 var logDir string
 var logFileName string
 var logFileFormat string
 var outputStyle string
 var sshTimeout int
+var pwdFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -65,6 +66,7 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gansible.yaml)")
+	rootCmd.PersistentFlags().StringVar(&pwdFile, "pwdfile", "", "password file (default is $HOME/.pwdfile)")
 	rootCmd.PersistentFlags().IntVar(&forks, "forks", 5, "number of concurrenrt tasks")
 	rootCmd.PersistentFlags().BoolVarP(&loging, "loging", "", false, "save result log")
 	rootCmd.PersistentFlags().StringVar(&logFileFormat, "log-file-format", "log", "log file format: log/json/yaml/csv")

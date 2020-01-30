@@ -40,6 +40,7 @@ var runCmd = &cobra.Command{
 Default timeout of each task is 300 seconds.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		passwords = utils.GetPassword(pwdFile)
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
 		ip, err := utils.ParseIP(nodeFile, nodes)

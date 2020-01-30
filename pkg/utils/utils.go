@@ -6,6 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"gansible/pkg/autologin"
+	homedir "github.com/mitchellh/go-homedir"
+	"github.com/pkg/sftp"
+	"golang.org/x/crypto/ssh"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"net"
@@ -16,10 +20,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/pkg/sftp"
-	"golang.org/x/crypto/ssh"
-	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -368,6 +368,34 @@ func ParseIP(ipFile, ipStr string) ([]string, error) {
 	}
 	ip = append(ip, fileip...)
 	return ip, nil
+}
+
+//GetPassword  parse password file and store passwords into slice
+func GetPassword(pwdFile string) []string {
+	passwords := []string{}
+	if pwdFile == "" {
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println("get homedir error:", err)
+			return nil
+		}
+		pwdFile = path.Join(home, ".pwdfile")
+	}
+	file, err := os.Open(pwdFile)
+	if err != nil {
+		log.Printf("can not open passowrd file: %s, err: [%v]", pwdFile, err)
+		return nil
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		passwords = append(passwords, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		log.Printf("Cannot scanner file: %s, err: [%v]", pwdFile, err)
+		return nil
+	}
+	return passwords
 }
 
 //TryPasswords ssh to a machine using a set of possible passwords concurrently.
