@@ -72,7 +72,6 @@ Default timeout of each task is 300 seconds.`,
 					wg.Done()
 				} else {
 					defer client.Close()
-					timeout := 300
 					noder.Result = utils.Execute(client, commands, timeout)
 					result <- noder
 					utils.PrintNodeResult(noder, outputStyle)
