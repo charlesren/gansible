@@ -71,7 +71,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&logDir, "log-dir", "", "dir to save log file")
 	rootCmd.PersistentFlags().StringVar(&logFileName, "log-file-name", "", "define name of log file")
 	rootCmd.PersistentFlags().StringVarP(&outputStyle, "output", "o", "gansible", "gansible output style: gansible/json/yaml")
-	rootCmd.PersistentFlags().IntVar(&sshTimeout, "ssh-timeout", 30, "ssh to a node must be successful within timeout duration")
+	rootCmd.PersistentFlags().IntVar(&sshTimeout, "ssh-timeout", 30, "login should be successful before timeout")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
