@@ -24,6 +24,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // shellCmd represents the shell command
@@ -47,56 +48,33 @@ var shellCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 			defer session.Close()
-			/*
-				//Exec cmd then quit
-				cmd := "date"
-				out, err := session.CombinedOutput(cmd)
-				if err != nil {
-					log.Fatal("Remote Exec Field:", err)
-				}
-				fmt.Println("Remote Exec Output:\n", string(out))
-			*/
-			//Start shell on remote host then interactive
 			session.Stdout = os.Stdout
 			session.Stderr = os.Stderr
 			session.Stdin = os.Stdin
 			modes := ssh.TerminalModes{
-				ssh.ECHO: 0, // disable echoing
-				//	ssh.ECHOCTL:       0,
+				ssh.ECHO:          1,     // enable echoing
 				ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
 				ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 			}
-
-			/*
-				fileDescriptor := int(os.Stdin.Fd())
-				if terminal.IsTerminal(fileDescriptor) {
-					originalState, err := terminal.MakeRaw(fileDescriptor)
-					if err != nil {
-						fmt.Println("lthi")
-					}
-					defer terminal.Restore(fileDescriptor, originalState)
-
-					termWidth, termHeight, err := terminal.GetSize(fileDescriptor)
-					if err != nil {
-						fmt.Println("hekl")
-					}
-
-					err = session.RequestPty("xterm-256color", termHeight, termWidth, modes)
-					if err != nil {
-						fmt.Println("hello")
-					}
+			fileDescriptor := int(os.Stdin.Fd())
+			if terminal.IsTerminal(fileDescriptor) {
+				originalState, err := terminal.MakeRaw(fileDescriptor)
+				if err != nil {
+					log.Fatalf("failed to get original state")
 				}
-			*/
-
-			if err := session.RequestPty("xterm-256color", 40, 80, modes); err != nil {
-				log.Fatalf("request for pseudo terminal failed: %s", err)
+				defer terminal.Restore(fileDescriptor, originalState)
+				termWidth, termHeight, err := terminal.GetSize(fileDescriptor)
+				if err != nil {
+					log.Fatalf("failed to get term width and  term height")
+				}
+				if err := session.RequestPty("xterm-256color", termHeight, termWidth, modes); err != nil {
+					log.Fatalf("request for pseudo terminal failed: %s", err)
+				}
 			}
 			if err := session.Shell(); err != nil {
 				log.Fatalf("failed to start shell: %s", err)
 			}
-			if err := session.Wait(); err != nil {
-				log.Fatalf("failed to wait: %s", err)
-			}
+			session.Wait()
 		}
 	},
 }
