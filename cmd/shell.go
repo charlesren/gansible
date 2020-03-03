@@ -61,16 +61,42 @@ var shellCmd = &cobra.Command{
 			session.Stderr = os.Stderr
 			session.Stdin = os.Stdin
 			modes := ssh.TerminalModes{
-				ssh.ECHO:          0,     // disable echoing
+				ssh.ECHO: 0, // disable echoing
+				//	ssh.ECHOCTL:       0,
 				ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
 				ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 			}
-			err = session.RequestPty("xterm-256color", 40, 80, modes)
-			if err != nil {
-				log.Fatal(err)
+
+			/*
+				fileDescriptor := int(os.Stdin.Fd())
+				if terminal.IsTerminal(fileDescriptor) {
+					originalState, err := terminal.MakeRaw(fileDescriptor)
+					if err != nil {
+						fmt.Println("lthi")
+					}
+					defer terminal.Restore(fileDescriptor, originalState)
+
+					termWidth, termHeight, err := terminal.GetSize(fileDescriptor)
+					if err != nil {
+						fmt.Println("hekl")
+					}
+
+					err = session.RequestPty("xterm-256color", termHeight, termWidth, modes)
+					if err != nil {
+						fmt.Println("hello")
+					}
+				}
+			*/
+
+			if err := session.RequestPty("xterm-256color", 40, 80, modes); err != nil {
+				log.Fatalf("request for pseudo terminal failed: %s", err)
 			}
-			err = session.Shell()
-			err = session.Wait()
+			if err := session.Shell(); err != nil {
+				log.Fatalf("failed to start shell: %s", err)
+			}
+			if err := session.Wait(); err != nil {
+				log.Fatalf("failed to wait: %s", err)
+			}
 		}
 	},
 }
