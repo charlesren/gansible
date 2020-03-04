@@ -2,8 +2,19 @@
 
 #### 介绍
 {**以下是码云平台说明，您可以替换此简介**
-码云是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用码云实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+Gansible is a lightweight cli tool designed for system administrator.
+可并发在一组服务器上执行命令、上传文件、下载文件、执行本地脚本。
+可设置并发量，远程登录超时时间，远程执行超时时间，以log、csv、json、yaml格式保存日志。
+支持以下功能
+1.尝试使用密码文件中的密码自动登录服务器，并交换操作。支持命令补全、上箭头、信号处理（Ctrl + C ，Ctrl + D）。
+2.上传文件或目录到远程服务器。目标文件夹不存在会自动创建。
+若源为文件，则把源文件上传到指定文件夹。
+若源为目录，则把目录下的文件及文件夹上传到指定文件夹。
+3.从远程服务器上下载文件或目录到本地。会在指定的本地文件夹内为每台主机新建一个以该主机IP地址为名称的文件夹。
+4.执行本地脚本。支持指定脚本运行目录、脚本参数。成功执行脚本返回成功，不判断脚本中内容实际执行情况。
+5.执行命令。
+}
+
 
 
 #### 安装教程
@@ -13,14 +24,230 @@
 3.  xxxx
 Gansible会尝试使用密码文件中的密码登录服务器。
 默认密码文件位置 ~/.pwdfile.每个密码占一行。
+
+
 #### 使用说明
+查看使用帮助
+1.查看帮助
+gansible -h
+
+2.自动登录到远程服务器。
+gansilbe shell 127.0.0.1
+
+2.执行命令。
+
+2.1在单个设备上执行命令
+[root@localhost gansible]# gansible run -n 127.0.0.1 -c hostname
+127.0.0.1 | Success | rc=0 >>
+localhost.localdomain
 
 
-1. 自动登录到远程服务器。支持命令补全、上箭头、信号处理（Ctrl + C ，Ctrl + D）。
-    gansilbe shell 127.0.0.1
-2.  xxxx
-3.  xxxx
+End Time: 2020-03-04 10:21:34
+Cost Time: 416.778768ms
+Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
+2.2 在多个设备执行命令
+eg1:
+[root@localhost gansible]# gansible run -n 127.0.0.1-3 -c hostname
+127.0.0.2 | Success | rc=0 >>
+localhost.localdomain
 
+127.0.0.1 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.3 | Success | rc=0 >>
+localhost.localdomain
+
+
+End Time: 2020-03-04 11:03:09
+Cost Time: 551.775334ms
+Total(3) : Success=3    Failed=0    Unreachable=0    Skipped=0
+eg2:
+[root@localhost gansible]# gansible run -n 127.0.0.1-127.0.0.3 -c hostname
+127.0.0.3 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.1 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.2 | Success | rc=0 >>
+localhost.localdomain
+
+
+End Time: 2020-03-04 11:11:05
+Cost Time: 471.530382ms
+Total(3) : Success=3    Failed=0    Unreachable=0    Skipped=0
+eg3:
+[root@localhost gansible]# gansible run -n "127.0.0.1-2;127.0.0.3;127.0.0.4-127.0.0.5" -c hostname
+127.0.0.3 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.4 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.2 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.1 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.5 | Success | rc=0 >>
+localhost.localdomain
+
+
+End Time: 2020-03-04 11:09:49
+Cost Time: 740.963261ms
+Total(5) : Success=5    Failed=0    Unreachable=0    Skipped=0
+eg4:
+[root@localhost gansible]# cat /tmp/nodefile.txt
+127.0.0.1
+127.0.0.2-3
+#127.0.0.4
+127.0.0.5-127.0.0.6
+ 
+[root@localhost gansible]# gansible run -f /tmp/nodefile.txt -c hostname
+127.0.0.2 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.6 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.3 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.1 | Success | rc=0 >>
+localhost.localdomain
+
+127.0.0.5 | Success | rc=0 >>
+localhost.localdomain
+
+
+End Time: 2020-03-04 11:17:44
+Cost Time: 683.091838ms
+Total(5) : Success=5    Failed=0    Unreachable=0    Skipped=0
+
+
+设定任务超时时间
+[root@localhost gansible]# gansible run -n 127.0.0.1 --timeout 3 -c "sleep 5"
+127.0.0.1 | Timeout | rc=1 >>
+Task not finished before 3 seconds
+
+End Time: 2020-03-04 11:34:57
+Cost Time: 5.399184215s
+Total(1) : Success=0    Failed=0    Unreachable=0    Skipped=0
+
+3.  执行本地脚本。
+
+本地脚本文件内容如下
+[root@localhost gansible]# cat date.sh
+#/bin/sh
+echo $1 >/tmp/date.log
+pwd >>/tmp/date.log
+
+-a 参数根据脚本情况，可选。
+指定参数执行脚本。
+[root@localhost gansible]# gansible script -n 127.0.0.1 -a "args" ./date.sh 
+127.0.0.1 | Success | rc=0 >>
+
+
+End Time: 2020-03-04 12:17:50
+Cost Time: 443.675611ms
+Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
+
+[root@localhost gansible]# cat /tmp/date.log
+args
+/root
+[root@localhost gansible]# 
+在指定目录执行脚本。
+[root@localhost gansible]# gansible script -n 127.0.0.1 -a "args" ./date.sh -d /tmp
+127.0.0.1 | Success | rc=0 >>
+
+
+End Time: 2020-03-04 12:14:45
+Cost Time: 428.455598ms
+Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
+
+[root@localhost gansible]# cat /tmp/date.log
+args
+/tmp
+[root@localhost gansible]# 
+
+4.下载文件或目录。需指定dest及src两个参数。
+
+下载文件
+[root@localhost gansible]# gansible fetch -n 127.0.0.1 -s /data/scm/gansible/date.sh -d /tmp/1
+127.0.0.1 | Success | rc=0 >>
+upload successfully!
+
+End Time: 2020-03-04 12:44:56
+Cost Time: 469.315007ms
+Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
+
+[root@localhost gansible]# ls -rtl /tmp/1
+total 0
+drwxr-xr-x. 2 root root 21 Mar  4 12:44 127.0.0.1
+[root@localhost gansible]# ls -rtl /tmp/1/127.0.0.1
+total 4
+-rw-r--r--. 1 root root 52 Mar  4 12:44 date.sh
+[root@localhost gansible]# 
+
+下载目录
+目录内容如下
+[root@localhost gansible]# ls -rtl /data/scm/gansible/testdir
+total 0
+-rw-r--r--. 1 root root  0 Mar  4 12:46 test.sh
+drwxr-xr-x. 2 root root 18 Mar  4 12:47 a
+-rw-r--r--. 1 root root  0 Mar  4 12:47 c.sh
+下载
+[root@localhost gansible]# gansible fetch -n 127.0.0.1 -s /data/scm/gansible/testdir -d /tmp/2
+127.0.0.1 | Success | rc=0 >>
+upload successfully!
+
+End Time: 2020-03-04 12:49:05
+Cost Time: 428.766883ms
+Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
+
+[root@localhost gansible]# ls -rtl /tmp/2
+total 0
+drwxr-xr-x. 3 root root 42 Mar  4 12:49 127.0.0.1
+[root@localhost gansible]# ls -rtl /tmp/2/127.0.0.1
+total 0
+-rw-r--r--. 1 root root  0 Mar  4 12:49 test.sh
+drwxr-xr-x. 2 root root 18 Mar  4 12:49 a
+-rw-r--r--. 1 root root  0 Mar  4 12:49 c.sh
+[root@localhost gansible]# ls -rtl /tmp/2/127.0.0.1/a
+total 0
+-rw-r--r--. 1 root root 0 Mar  4 12:49 b.sh
+[root@localhost gansible]# 
+
+5.上传文件或目录。需指定dest及src两个参数。
+上传文件
+[root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/date.sh -d /tmp/1
+127.0.0.1 | Success | rc=0 >>
+upload successfully!
+
+End Time: 2020-03-04 14:39:45
+Cost Time: 399.632118ms
+Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
+
+[root@localhost gansible]# ls -rtl /tmp/1
+total 4
+-rw-r--r--. 1 root root 52 Mar  4 14:39 date.sh
+[root@localhost gansible]# 
+上传目录
+[root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/testdir -d /tmp/2
+127.0.0.1 | Success | rc=0 >>
+upload successfully!
+
+End Time: 2020-03-04 14:42:25
+Cost Time: 427.764754ms
+Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
+
+[root@localhost gansible]# ls -rtl /tmp/2
+total 0
+drwxr-xr-x. 2 root root 18 Mar  4 14:42 a
+-rw-r--r--. 1 root root  0 Mar  4 14:42 c.sh
+-rw-r--r--. 1 root root  0 Mar  4 14:42 test.sh
+[root@localhost gansible]# 
 
 #### 参与贡献
 
@@ -29,12 +256,3 @@ Gansible会尝试使用密码文件中的密码登录服务器。
 3.  提交代码
 4.  新建 Pull Request
 
-
-#### 码云特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5.  码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
