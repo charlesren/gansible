@@ -46,13 +46,15 @@ gansilbe shell 127.0.0.1
 - 通过-f 参数指定ip文件。
 支持1中的三种格式。行前有#则忽略该行。
 文件内容示例如下：
-\# cat /tmp/nodefile.txt
+```
+# cat /tmp/nodefile.txt
 127.0.0.1
 127.0.0.2-3
 #127.0.0.4
 127.0.0.5-127.0.0.6
-
+```
 eg1:
+```
 [root@localhost gansible]# gansible run -n "127.0.0.1-2;127.0.0.3;127.0.0.4-127.0.0.5" -c hostname
 127.0.0.3 | Success | rc=0 >>
 localhost.localdomain
@@ -73,8 +75,9 @@ localhost.localdomain
 End Time: 2020-03-04 11:09:49
 Cost Time: 740.963261ms
 Total(5) : Success=5    Failed=0    Unreachable=0    Skipped=0
-
+```
 eg2:
+```
 [root@localhost gansible]# cat /tmp/nodefile.txt
 127.0.0.1
 127.0.0.2-3
@@ -101,9 +104,10 @@ localhost.localdomain
 End Time: 2020-03-04 11:17:44
 Cost Time: 683.091838ms
 Total(5) : Success=5    Failed=0    Unreachable=0    Skipped=0
-
+```
 
 设定任务超时时间
+```
 [root@localhost gansible]# gansible run -n 127.0.0.1 --timeout 3 -c "sleep 5"
 127.0.0.1 | Timeout | rc=1 >>
 Task not finished before 3 seconds
@@ -111,17 +115,19 @@ Task not finished before 3 seconds
 End Time: 2020-03-04 11:34:57
 Cost Time: 5.399184215s
 Total(1) : Success=0    Failed=0    Unreachable=0    Skipped=0
-
+```
 4. 执行本地脚本。
 
 本地脚本文件内容如下：
+```
 [root@localhost gansible]# cat date.sh
 #/bin/sh
 echo $1 >/tmp/date.log
 pwd >>/tmp/date.log
-
+```
 -a 参数根据脚本情况，可选。
 指定参数执行脚本。
+```
 [root@localhost gansible]# gansible script -n 127.0.0.1 -a "args" ./date.sh 
 127.0.0.1 | Success | rc=0 >>
 
@@ -129,14 +135,14 @@ pwd >>/tmp/date.log
 End Time: 2020-03-04 12:17:50
 Cost Time: 443.675611ms
 Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
-
 [root@localhost gansible]# cat /tmp/date.log
 args
 /root
 [root@localhost gansible]# 
-
+```
 
 在指定目录执行脚本。
+```
 [root@localhost gansible]# gansible script -n 127.0.0.1 -a "args" ./date.sh -d /tmp
 127.0.0.1 | Success | rc=0 >>
 
@@ -149,10 +155,11 @@ Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
 args
 /tmp
 [root@localhost gansible]# 
-
+```
 5. 下载文件或目录。需指定dest及src两个参数。
 
 下载文件
+```
 [root@localhost gansible]# gansible fetch -n 127.0.0.1 -s /data/scm/gansible/date.sh -d /tmp/1
 127.0.0.1 | Success | rc=0 >>
 upload successfully!
@@ -168,8 +175,9 @@ drwxr-xr-x. 2 root root 21 Mar  4 12:44 127.0.0.1
 total 4
 -rw-r--r--. 1 root root 52 Mar  4 12:44 date.sh
 [root@localhost gansible]# 
-
+```
 下载目录
+```
 [root@localhost gansible]# ls -rtl /data/scm/gansible/testdir
 total 0
 -rw-r--r--. 1 root root  0 Mar  4 12:46 test.sh
@@ -195,9 +203,10 @@ drwxr-xr-x. 2 root root 18 Mar  4 12:49 a
 total 0
 -rw-r--r--. 1 root root 0 Mar  4 12:49 b.sh
 [root@localhost gansible]# 
-
+```
 6. 上传文件或目录。需指定dest及src两个参数。
 上传文件
+```
 [root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/date.sh -d /tmp/1
 127.0.0.1 | Success | rc=0 >>
 upload successfully!
@@ -210,7 +219,9 @@ Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
 total 4
 -rw-r--r--. 1 root root 52 Mar  4 14:39 date.sh
 [root@localhost gansible]# 
+```
 上传目录
+```
 [root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/testdir -d /tmp/2
 127.0.0.1 | Success | rc=0 >>
 upload successfully!
@@ -225,7 +236,7 @@ drwxr-xr-x. 2 root root 18 Mar  4 14:42 a
 -rw-r--r--. 1 root root  0 Mar  4 14:42 c.sh
 -rw-r--r--. 1 root root  0 Mar  4 14:42 test.sh
 [root@localhost gansible]# 
-
+```
 #### 参与贡献
 
 1.  Fork 本仓库
