@@ -126,7 +126,8 @@ echo $1 >/tmp/date.log
 pwd >>/tmp/date.log
 ```
 
-指定参数执行脚本。*-a 可指定脚本参数，根据脚本实际情况选用。*
+指定参数执行脚本:
+*-a 可指定脚本参数，根据脚本实际情况选用。*
 ```
 [root@localhost gansible]# gansible script -n 127.0.0.1 -a "args" ./date.sh 
 127.0.0.1 | Success | rc=0 >>
