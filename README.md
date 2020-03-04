@@ -46,7 +46,7 @@ gansilbe shell 127.0.0.1
 2）通过-f 参数指定ip文件。
 支持1中的三种格式。行前有#则忽略该行。
 文件内容示例如下：
-# cat /tmp/nodefile.txt
+/# cat /tmp/nodefile.txt
 127.0.0.1
 127.0.0.2-3
 #127.0.0.4
