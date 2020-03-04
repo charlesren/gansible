@@ -22,12 +22,11 @@ Gansible is a lightweight cli tool designed for system administrator.
 
 
 #### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-Gansible会尝试使用密码文件中的密码登录服务器。
-默认密码文件位置 ~/.pwdfile.每个密码占一行。
+**Linux 系统**
+- git clone https://github.com/charlesren/gansible.git
+- 在源码目录下执行go build生成gansible二进制文件
+1.  cp gansible /usr/bin/gansible
+2. 设置密码文件。Gansible会尝试使用密码文件中的密码登录服务器。默认密码文件位置 ~/.pwdfile.每个密码占一行。
 
 
 #### 使用说明
@@ -53,7 +52,7 @@ gansilbe shell 127.0.0.1
 #127.0.0.4
 127.0.0.5-127.0.0.6
 ```
-eg1:
+使用-n 参数指定多个设备:
 ```
 [root@localhost gansible]# gansible run -n "127.0.0.1-2;127.0.0.3;127.0.0.4-127.0.0.5" -c hostname
 127.0.0.3 | Success | rc=0 >>
@@ -76,7 +75,7 @@ End Time: 2020-03-04 11:09:49
 Cost Time: 740.963261ms
 Total(5) : Success=5    Failed=0    Unreachable=0    Skipped=0
 ```
-eg2:
+使用-f 参数指定设备文件:
 ```
 [root@localhost gansible]# cat /tmp/nodefile.txt
 127.0.0.1
