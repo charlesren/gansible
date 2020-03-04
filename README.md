@@ -184,6 +184,8 @@ total 0
 -rw-r--r--. 1 root root  0 Mar  4 12:46 test.sh
 drwxr-xr-x. 2 root root 18 Mar  4 12:47 a
 -rw-r--r--. 1 root root  0 Mar  4 12:47 c.sh
+```
+```
 [root@localhost gansible]# gansible fetch -n 127.0.0.1 -s /data/scm/gansible/testdir -d /tmp/2
 127.0.0.1 | Success | rc=0 >>
 upload successfully!
@@ -191,15 +193,20 @@ upload successfully!
 End Time: 2020-03-04 12:49:05
 Cost Time: 428.766883ms
 Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
-
+```
+```
 [root@localhost gansible]# ls -rtl /tmp/2
 total 0
 drwxr-xr-x. 3 root root 42 Mar  4 12:49 127.0.0.1
+```
+```
 [root@localhost gansible]# ls -rtl /tmp/2/127.0.0.1
 total 0
 -rw-r--r--. 1 root root  0 Mar  4 12:49 test.sh
 drwxr-xr-x. 2 root root 18 Mar  4 12:49 a
 -rw-r--r--. 1 root root  0 Mar  4 12:49 c.sh
+```
+```
 [root@localhost gansible]# ls -rtl /tmp/2/127.0.0.1/a
 total 0
 -rw-r--r--. 1 root root 0 Mar  4 12:49 b.sh
@@ -216,7 +223,8 @@ upload successfully!
 End Time: 2020-03-04 14:39:45
 Cost Time: 399.632118ms
 Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
-
+```
+```
 [root@localhost gansible]# ls -rtl /tmp/1
 total 4
 -rw-r--r--. 1 root root 52 Mar  4 14:39 date.sh
@@ -231,7 +239,8 @@ upload successfully!
 End Time: 2020-03-04 14:42:25
 Cost Time: 427.764754ms
 Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
-
+```
+```
 [root@localhost gansible]# ls -rtl /tmp/2
 total 0
 drwxr-xr-x. 2 root root 18 Mar  4 14:42 a
