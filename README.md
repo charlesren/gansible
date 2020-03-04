@@ -124,8 +124,8 @@ Total(1) : Success=0    Failed=0    Unreachable=0    Skipped=0
 echo $1 >/tmp/date.log
 pwd >>/tmp/date.log
 ```
--a 参数根据脚本情况，可选。
-指定参数执行脚本。
+
+指定参数执行脚本。*-a 可指定脚本参数，根据脚本实际情况选用。*
 ```
 [root@localhost gansible]# gansible script -n 127.0.0.1 -a "args" ./date.sh 
 127.0.0.1 | Success | rc=0 >>
@@ -140,7 +140,7 @@ args
 [root@localhost gansible]# 
 ```
 
-在指定目录执行脚本。
+在指定目录执行脚本:
 ```
 [root@localhost gansible]# gansible script -n 127.0.0.1 -a "args" ./date.sh -d /tmp
 127.0.0.1 | Success | rc=0 >>
@@ -157,7 +157,7 @@ args
 ```
 5. 下载文件或目录。需指定dest及src两个参数。
 
-下载文件
+下载文件:
 ```
 [root@localhost gansible]# gansible fetch -n 127.0.0.1 -s /data/scm/gansible/date.sh -d /tmp/1
 127.0.0.1 | Success | rc=0 >>
@@ -175,7 +175,7 @@ total 4
 -rw-r--r--. 1 root root 52 Mar  4 12:44 date.sh
 [root@localhost gansible]# 
 ```
-下载目录
+下载目录:
 ```
 [root@localhost gansible]# ls -rtl /data/scm/gansible/testdir
 total 0
@@ -205,7 +205,7 @@ total 0
 ```
 6. 上传文件或目录。需指定dest及src两个参数。
 
-上传文件
+上传文件:
 ```
 [root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/date.sh -d /tmp/1
 127.0.0.1 | Success | rc=0 >>
@@ -220,7 +220,7 @@ total 4
 -rw-r--r--. 1 root root 52 Mar  4 14:39 date.sh
 [root@localhost gansible]# 
 ```
-上传目录
+上传目录:
 ```
 [root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/testdir -d /tmp/2
 127.0.0.1 | Success | rc=0 >>
