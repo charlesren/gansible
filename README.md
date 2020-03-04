@@ -82,7 +82,8 @@ Total(5) : Success=5    Failed=0    Unreachable=0    Skipped=0
 127.0.0.2-3
 #127.0.0.4
 127.0.0.5-127.0.0.6
- 
+```
+```
 [root@localhost gansible]# gansible run -f /tmp/nodefile.txt -c hostname
 127.0.0.2 | Success | rc=0 >>
 localhost.localdomain
@@ -105,7 +106,7 @@ Cost Time: 683.091838ms
 Total(5) : Success=5    Failed=0    Unreachable=0    Skipped=0
 ```
 
-设定任务超时时间
+设定任务超时时间:
 ```
 [root@localhost gansible]# gansible run -n 127.0.0.1 --timeout 3 -c "sleep 5"
 127.0.0.1 | Timeout | rc=1 >>
