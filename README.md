@@ -205,6 +205,7 @@ total 0
 [root@localhost gansible]# 
 ```
 6. 上传文件或目录。需指定dest及src两个参数。
+
 上传文件
 ```
 [root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/date.sh -d /tmp/1
