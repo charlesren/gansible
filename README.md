@@ -9,10 +9,15 @@ Gansible is a lightweight cli tool designed for system administrator.
 1. 并发在多个设备上执行任务。默认5个并发，可通过--forks参数设定并发数量，最大10000。
 2. 可设置ssh连接超时时间。默认30秒，可通过--ssh-timeout参数设定。
 3. 以默认（gansible）、json、yaml格式输出任务结果。
-4. 以log、csv、json、yaml格式保存任务日志记录。默认不保存、可通过--loging参数设定保存日志。默认日志目录为系统零时文件夹，名称为gansible_year-mounth-day_hour:minuter:secondes.log,如/tmp/gansible_2020-03-05_15:40:40.log。可通过--log-dir 指定日志目录。通过--log-file-format指定日志格式。通过--log-file-name指定日志名称。
+4. 以log、csv、json、yaml格式保存任务日志记录。默认不保存、可通过--loging参数设定保存日志。默认日志目录为系统零时文件夹，名称为gansible_year-mounth-day_hour:minuter:secondes.log,如/tmp/gansible_2020-03-05_15:40:40.log。可通过--log-dir 指定日志目录,通过--log-file-format指定日志格式,通过--log-file-name指定日志名称。
 5. golang 编写，跨平台，无依赖。
 
-- 主要功能如下：
+- 计划中：
+1. 支持秘钥登录，指定用户名、密码登录。
+2. 重复ip自动检测。
+3. 多颜色展示输出。
+
+- 目前主要功能如下：
 1. 尝试使用密码文件中的密码自动登录服务器，并交换操作。支持命令补全、上箭头、信号处理（Ctrl + C ，Ctrl + D）。
 2. 上传文件或目录到远程服务器。目标文件夹不存在会自动创建。若源为文件，则把源文件上传到指定文件夹。若源为目录，则把目录下的文件及文件夹上传到指定文件夹。
 3. 从远程服务器上下载文件或目录到本地。会在指定的本地文件夹内为每台主机新建一个以该主机IP地址为名称的文件夹。
