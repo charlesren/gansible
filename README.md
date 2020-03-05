@@ -9,7 +9,7 @@ Gansible is a lightweight cli tool designed for system administrator.
 1. 并发在多个设备上执行任务。默认5个并发，可通过--forks参数设定并发数量，最大10000。
 2. 可设置ssh连接超时时间。默认30秒，可通过--ssh-timeout参数设定。
 3. 以默认（gansible）、json、yaml格式输出任务结果。
-4. 以log、csv、json、yaml格式保存任务日志记录。
+4. 以log、csv、json、yaml格式保存任务日志记录。默认不保存、可通过--loging参数设定保存日志。默认日志目录为系统零时文件夹，名称为gansible_year-mounth-day_hour:minuter:secondes.log,如/tmp/gansible_2020-03-05_15:40:40.log。可通过--log-dir 指定日志目录。通过--log-file-format指定日志格式。通过--log-file-name指定日志名称。
 5. golang 编写，跨平台，无依赖。
 
 - 主要功能如下：
