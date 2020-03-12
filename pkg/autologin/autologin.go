@@ -91,6 +91,15 @@ func getPublicKeyAuthMethod(keyPath string, keyPassword string, password string)
 	} else if socket := os.Getenv("SSH_AUTH_SOCK"); socket != "" {
 		return publicKeyWithSSHAgentAuth()
 	} else {
+		defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa.pub")
+		if err != nil {
+			log.Fatal("find key's home dir failed", err)
+			return nil
+		}
+		if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
+			fmt.Println("default key file does not exist")
+			return nil
+		}
 		return publicKeyAuth(keyPath)
 	}
 }
