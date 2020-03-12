@@ -79,3 +79,18 @@ func publicKeyWithSSHAgentAuth() ssh.AuthMethod {
 	agentClient := agent.NewClient(conn)
 	return ssh.PublicKeysCallback(agentClient.Signers)
 }
+
+func getPublicKeyAuthMethod(keyPath string, keyPassword string, password string) ssh.AuthMethod {
+	if password != "" {
+		return ssh.Password(password)
+	} else if keyPath != "" {
+		if keyPassword != "" {
+			return publicKeyWithPasswordAuth(keyPath, keyPassword)
+		}
+		return publicKeyAuth(keyPath)
+	} else if socket := os.Getenv("SSH_AUTH_SOCK"); socket != "" {
+		return publicKeyWithSSHAgentAuth()
+	} else {
+		return publicKeyAuth(keyPath)
+	}
+}
