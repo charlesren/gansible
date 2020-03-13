@@ -54,6 +54,9 @@ func Do(keyPath string, keyPassword string, user string, password string, host s
 
 //PublicKeyAuth func return ssh.AuthMethod
 func PublicKeyAuth(keyPath string) ssh.AuthMethod {
+	if keyPath == "" {
+		keyPath = "~/.ssh/id_rsa"
+	}
 	keyFile, err := homedir.Expand(keyPath)
 	if err != nil {
 		log.Fatal("find key's home dir failed", err)
@@ -109,13 +112,11 @@ func GetAuthMethod(keyPath string, keyPassword string, password string) ssh.Auth
 	} else if socket := os.Getenv("SSH_AUTH_SOCK"); socket != "" {
 		return PublicKeyWithSSHAgentAuth()
 	} else {
-		defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa.pub")
+		defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
 		if err != nil {
-			log.Fatal("find key's home dir failed", err)
 			return ssh.Password(password)
 		}
 		if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
-			fmt.Println("default key file does not exist")
 			return ssh.Password(password)
 		}
 		return PublicKeyAuth(keyPath)
