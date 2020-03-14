@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"gansible/pkg/connect"
 	"gansible/pkg/utils"
 	"reflect"
 	"time"
@@ -34,10 +35,9 @@ var dest string
 // pushCmd represents the push command
 var pushCmd = &cobra.Command{
 	Use:   "push",
-	Short: "Upload file to remote host",
-	Long:  `Upload file to remote host.`,
+	Short: "Upload file to remote node",
+	Long:  `Upload file to remote node.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		passwords := utils.GetPassword(pwdFile)
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
 		ip, err := utils.ParseIP(nodeFile, nodes)
@@ -54,11 +54,11 @@ var pushCmd = &cobra.Command{
 				return
 			}
 			result := make(chan utils.NodeResult, len(ip))
-			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
+			p, _ := ants.NewPoolWithFunc(forks, func(node interface{}) {
 				noder := utils.NodeResult{}
-				noder.Node = reflect.ValueOf(host).String()
+				noder.Node = reflect.ValueOf(node).String()
 				var client *ssh.Client
-				client, err = utils.TryPasswords("root", passwords, reflect.ValueOf(host).String(), 22, sshTimeout)
+				client, err = connect.Do(keyPath, keyPassword, user, password, reflect.ValueOf(node).String(), port, sshTimeout, pwdFile)
 				if err != nil {
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
@@ -91,9 +91,9 @@ var pushCmd = &cobra.Command{
 					sumr.NodeResult = append(sumr.NodeResult, t)
 				}
 			}()
-			for _, host := range ip {
+			for _, node := range ip {
 				wg.Add(1)
-				p.Invoke(host)
+				p.Invoke(node)
 			}
 			wg.Wait()
 		}
