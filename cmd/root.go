@@ -41,7 +41,7 @@ var (
 	user          string
 	password      string
 	node          string
-	port          string
+	port          int
 	sshTimeout    int
 	pwdFile       string
 )
@@ -84,7 +84,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&user, "user", "u", "", "user used to login remote server")
 	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "password of remote server")
 	//rootCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
-	rootCmd.Flags().StringVar(&port, "port", "22", "port used to login remote server")
+	rootCmd.Flags().IntVar(&port, "port", 22, "port used to login remote server")
 	rootCmd.PersistentFlags().IntVar(&sshTimeout, "ssh-timeout", 30, "login should be successful before timeout")
 	rootCmd.PersistentFlags().StringVar(&pwdFile, "pwdfile", "", "password file (default is $HOME/.pwdfile)")
 	// Cobra also supports local flags, which will only run
