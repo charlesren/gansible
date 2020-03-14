@@ -3,7 +3,6 @@ package connect
 import (
 	"bufio"
 	"fmt"
-	"gansible/pkg/autologin"
 	"io/ioutil"
 	"log"
 	"net"
@@ -19,7 +18,7 @@ import (
 )
 
 //Do func is used to connect to server
-func Do(keyPath string, keyPassword string, user string, password string, host string, port int, sshTimeout int) (*ssh.Client, error) {
+func Do(keyPath string, keyPassword string, user string, password string, host string, port int, sshTimeout int, pwdFile string) (*ssh.Client, error) {
 	var (
 		authMethod   []ssh.AuthMethod
 		addr         string
@@ -28,9 +27,6 @@ func Do(keyPath string, keyPassword string, user string, password string, host s
 		config       ssh.Config
 		err          error
 	)
-	authMethod = make([]ssh.AuthMethod, 0)
-	auth := GetAuthMethod(keyPath, keyPassword, password)
-	authMethod = append(authMethod, auth)
 	if user == "" {
 		currentUser, err := osuser.Current()
 		if err != nil {
@@ -38,6 +34,7 @@ func Do(keyPath string, keyPassword string, user string, password string, host s
 		}
 		user = currentUser.Name
 	}
+	authMethod = make([]ssh.AuthMethod, 0)
 	clientConfig = &ssh.ClientConfig{
 		User:            user,
 		Auth:            authMethod,
@@ -46,8 +43,23 @@ func Do(keyPath string, keyPassword string, user string, password string, host s
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 	addr = fmt.Sprintf("%s:%d", host, port)
+	auth := GetAuthMethod(keyPath, keyPassword, password)
+	if auth == nil {
+		passwords := GetPassword(pwdFile)
+		client, err := TryPasswords(user, passwords, host, port, sshTimeout)
+		if err != nil {
+			return nil, err
+		}
+		return client, nil
+	}
+	clientConfig.Auth = append(clientConfig.Auth, auth)
 	if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
-		return nil, err
+		passwords := GetPassword(pwdFile)
+		client, err := TryPasswords(user, passwords, host, port, sshTimeout)
+		if err != nil {
+			return nil, err
+		}
+		return client, nil
 	}
 	return client, nil
 }
@@ -189,7 +201,7 @@ func TryPasswords(user string, passwords []string, host string, port int, sshTim
 	errAllPassWrong := fmt.Errorf("All passwords are wrong")
 	for _, password := range passwords {
 		go func(password string) {
-			c, err := autologin.Connect("root", password, host, 22)
+			c, err := WithPass(user, password, host, port, sshTimeout)
 			if err == nil {
 				ch <- c
 			} else {
@@ -210,4 +222,30 @@ func TryPasswords(user string, passwords []string, host string, port int, sshTim
 	case <-timer.C:
 		return nil, errTimeout
 	}
+}
+
+//WithPass connect server with password
+func WithPass(user string, password string, host string, port int, sshTimeout int) (*ssh.Client, error) {
+	var (
+		authMethod   []ssh.AuthMethod
+		addr         string
+		clientConfig *ssh.ClientConfig
+		client       *ssh.Client
+		config       ssh.Config
+		err          error
+	)
+	authMethod = make([]ssh.AuthMethod, 0)
+	authMethod = append(authMethod, ssh.Password(password))
+	clientConfig = &ssh.ClientConfig{
+		User:            user,
+		Auth:            authMethod,
+		Timeout:         time.Duration(sshTimeout) * time.Second,
+		Config:          config,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+	addr = fmt.Sprintf("%s:%d", host, port)
+	if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
+		return nil, err
+	}
+	return client, nil
 }
