@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"gansible/pkg/connect"
 	"gansible/pkg/utils"
 	"reflect"
 	"sync"
@@ -40,7 +41,6 @@ var runCmd = &cobra.Command{
 Default timeout of each task is 300 seconds.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		passwords := utils.GetPassword(pwdFile)
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
 		ip, err := utils.ParseIP(nodeFile, nodes)
@@ -57,11 +57,11 @@ Default timeout of each task is 300 seconds.`,
 				return
 			}
 			result := make(chan utils.NodeResult, len(ip))
-			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
+			p, _ := ants.NewPoolWithFunc(forks, func(node interface{}) {
 				noder := utils.NodeResult{}
-				noder.Node = reflect.ValueOf(host).String()
+				noder.Node = reflect.ValueOf(node).String()
 				var client *ssh.Client
-				client, err = utils.TryPasswords("root", passwords, reflect.ValueOf(host).String(), 22, sshTimeout)
+				client, err = connect.Do(keyPath, keyPassword, user, password, reflect.ValueOf(node).String(), 22, sshTimeout, pwdFile)
 				if err != nil {
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
@@ -86,9 +86,9 @@ Default timeout of each task is 300 seconds.`,
 					sumr.NodeResult = append(sumr.NodeResult, t)
 				}
 			}()
-			for _, host := range ip {
+			for _, node := range ip {
 				wg.Add(1)
-				p.Invoke(host)
+				p.Invoke(node)
 			}
 			wg.Wait()
 		}
