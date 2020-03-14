@@ -74,6 +74,9 @@ func PublicKeyAuth(keyPath string) ssh.AuthMethod {
 
 //PublicKeyWithPasswordAuth func return ssh.AuthMethod
 func PublicKeyWithPasswordAuth(keyPath string, keyPassword string) ssh.AuthMethod {
+	if keyPath == "" {
+		keyPath = "~/.ssh/id_rsa"
+	}
 	keyFile, err := homedir.Expand(keyPath)
 	if err != nil {
 		log.Fatal("find key's home dir failed", err)
@@ -100,27 +103,50 @@ func PublicKeyWithSSHAgentAuth() ssh.AuthMethod {
 	return ssh.PublicKeysCallback(agentClient.Signers)
 }
 
-//GetAuthMethod func return ssh.AuthMethod
+//GetAuthMethod func return ssh.AuthMethod.
+//Only if password is assigned return ssh.Password AuthMethod,otherwise return key related AuthMethod or nil.
 func GetAuthMethod(keyPath string, keyPassword string, password string) ssh.AuthMethod {
+	//password is assigned
 	if password != "" {
 		return ssh.Password(password)
-	} else if keyPath != "" {
+	}
+
+	//password is not assigned; keyPath is assigned
+	if keyPath != "" {
 		if keyPassword != "" {
 			return PublicKeyWithPasswordAuth(keyPath, keyPassword)
 		}
 		return PublicKeyAuth(keyPath)
-	} else if socket := os.Getenv("SSH_AUTH_SOCK"); socket != "" {
-		return PublicKeyWithSSHAgentAuth()
-	} else {
+	}
+
+	//password is not assigned; keyPath is not assigned;keyPassword is assigned
+	if keyPassword != "" {
 		defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
 		if err != nil {
-			return ssh.Password(password)
+			fmt.Printf("find default key's home dir failed: %s", err)
+			return nil
 		}
 		if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
-			return ssh.Password(password)
+			fmt.Printf("default key file is not exist: %s", err)
+			return nil
 		}
-		return PublicKeyAuth(keyPath)
+		return PublicKeyWithPasswordAuth(defaultKeyFile, keyPassword)
 	}
+
+	//password is not assigned; keyPath is not assigned;keyPassword is not assigned
+	if socket := os.Getenv("SSH_AUTH_SOCK"); socket != "" {
+		return PublicKeyWithSSHAgentAuth()
+	}
+	defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
+	fmt.Printf("find default key's home dir failed: %s", err)
+	if err != nil {
+		return nil
+	}
+	if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
+		fmt.Printf("default key file is not exist: %s", err)
+		return nil
+	}
+	return PublicKeyAuth(defaultKeyFile)
 }
 
 //GetPassword  parse password file and store passwords into slice
