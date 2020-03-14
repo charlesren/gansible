@@ -33,8 +33,8 @@ import (
 // fetchCmd represents the fetch command
 var fetchCmd = &cobra.Command{
 	Use:   "fetch",
-	Short: "Download file from remote node",
-	Long:  `Download file from remote node.`,
+	Short: "Download file from remote nodes",
+	Long:  `Download file from remote nodes.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
