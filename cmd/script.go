@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"gansible/pkg/connect"
 	"gansible/pkg/utils"
 	"path"
 	"reflect"
@@ -35,10 +36,10 @@ var scriptArgs string
 // scriptCmd represents the script command
 var scriptCmd = &cobra.Command{
 	Use:   "script",
-	Short: "Run local script on remote hosts",
-	Long:  `Run local script on remote hosts.`,
+	Short: "Run local script on remote nodes",
+	Long:  `Run local script on remote nodes.`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		passwords := utils.GetPassword(pwdFile)
 		scriptFile := args[0]
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
@@ -56,11 +57,11 @@ var scriptCmd = &cobra.Command{
 				return
 			}
 			result := make(chan utils.NodeResult, len(ip))
-			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
+			p, _ := ants.NewPoolWithFunc(forks, func(node interface{}) {
 				noder := utils.NodeResult{}
-				noder.Node = reflect.ValueOf(host).String()
+				noder.Node = reflect.ValueOf(node).String()
 				var client *ssh.Client
-				client, err = utils.TryPasswords("root", passwords, reflect.ValueOf(host).String(), 22, sshTimeout)
+				client, err = connect.Do(keyPath, keyPassword, user, password, reflect.ValueOf(node).String(), port, sshTimeout, pwdFile)
 				if err != nil {
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
@@ -105,9 +106,9 @@ var scriptCmd = &cobra.Command{
 					sumr.NodeResult = append(sumr.NodeResult, t)
 				}
 			}()
-			for _, host := range ip {
+			for _, node := range ip {
 				wg.Add(1)
-				p.Invoke(host)
+				p.Invoke(node)
 			}
 			wg.Wait()
 		}
