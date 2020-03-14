@@ -26,17 +26,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-var forks int
-var nodes string
-var nodeFile string
-var loging bool
-var logDir string
-var logFileName string
-var logFileFormat string
-var outputStyle string
-var sshTimeout int
-var pwdFile string
+var (
+	cfgFile       string
+	forks         int
+	nodes         string
+	nodeFile      string
+	loging        bool
+	logDir        string
+	logFileName   string
+	logFileFormat string
+	outputStyle   string
+	sshTimeout    int
+	pwdFile       string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
