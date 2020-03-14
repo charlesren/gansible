@@ -608,7 +608,7 @@ func DownloadFile(sftpClient *sftp.Client, srcFilePath string, destDir string) E
 	}
 	execr.Status = StatusSuccess
 	execr.RetrunCode = "0"
-	execr.Out = "upload successfully!"
+	execr.Out = "download successfully!"
 	return execr
 }
 
