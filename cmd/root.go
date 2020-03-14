@@ -36,6 +36,12 @@ var (
 	logFileName   string
 	logFileFormat string
 	outputStyle   string
+	keyPath       string
+	keyPassword   string
+	user          string
+	password      string
+	node          string
+	port          string
 	sshTimeout    int
 	pwdFile       string
 )
@@ -67,14 +73,20 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gansible.yaml)")
-	rootCmd.PersistentFlags().StringVar(&pwdFile, "pwdfile", "", "password file (default is $HOME/.pwdfile)")
 	rootCmd.PersistentFlags().IntVar(&forks, "forks", 5, "number of concurrenrt tasks")
 	rootCmd.PersistentFlags().BoolVarP(&loging, "loging", "", false, "save result log")
 	rootCmd.PersistentFlags().StringVar(&logFileFormat, "log-file-format", "log", "log file format: log/json/yaml/csv")
 	rootCmd.PersistentFlags().StringVar(&logDir, "log-dir", "", "dir to save log file")
 	rootCmd.PersistentFlags().StringVar(&logFileName, "log-file-name", "", "define name of log file")
 	rootCmd.PersistentFlags().StringVarP(&outputStyle, "output", "o", "gansible", "gansible output style: gansible/json/yaml")
+	rootCmd.PersistentFlags().StringVar(&keyPath, "keyPath", "~/.ssh/id_rsa", "ssh private key file path")
+	rootCmd.PersistentFlags().StringVar(&keyPassword, "keyPassword", "", "password of ssh private key")
+	rootCmd.PersistentFlags().StringVarP(&user, "user", "u", "", "user used to login remote server")
+	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "password of remote server")
+	//rootCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	rootCmd.Flags().StringVar(&port, "port", "22", "port used to login remote server")
 	rootCmd.PersistentFlags().IntVar(&sshTimeout, "ssh-timeout", 30, "login should be successful before timeout")
+	rootCmd.PersistentFlags().StringVar(&pwdFile, "pwdfile", "", "password file (default is $HOME/.pwdfile)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
