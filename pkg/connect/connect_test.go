@@ -20,7 +20,7 @@ func TestDo(t *testing.T) {
 	if true {
 		fmt.Println("password auth test...")
 		password = "yourpassword"
-		_, err := Do(keyPath, keyPassword, user, password, host, port)
+		_, err := Do(keyPath, keyPassword, user, password, host, port, 30)
 		if err != nil {
 			t.Errorf("user password login failed: %s", err)
 		}
@@ -30,7 +30,7 @@ func TestDo(t *testing.T) {
 	if true {
 		fmt.Println("ssh key auth test...")
 		keyPath = "~/.ssh/id_rsa"
-		_, err := Do(keyPath, keyPassword, user, password, host, port)
+		_, err := Do(keyPath, keyPassword, user, password, host, port, 30)
 		if err != nil {
 			t.Errorf("user login failed: %s", err)
 		}
@@ -42,7 +42,7 @@ func TestDo(t *testing.T) {
 			fmt.Println("ssh key with keypass auth test...")
 			keyPath = "~/.ssh/id_rsa"
 			keyPassword = "yourkeypass"
-			_, err := Do(keyPath, keyPassword, user, password, host, port)
+			_, err := Do(keyPath, keyPassword, user, password, host, port,30)
 			if err != nil {
 				t.Errorf("user login failed: %s", err)
 			}
@@ -58,7 +58,7 @@ func TestDo(t *testing.T) {
 		//3.password auth (will return err,becase password is not set)
 		if true {
 			fmt.Println("no args test ")
-			_, err := Do(keyPath, keyPassword, user, password, host, port)
+			_, err := Do(keyPath, keyPassword, user, password, host, port,30)
 			if err != nil {
 				t.Errorf("user login failed: %s", err)
 			}

@@ -18,8 +18,8 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 )
 
-//Do func id used to connect to server
-func Do(keyPath string, keyPassword string, user string, password string, host string, port int) (*ssh.Client, error) {
+//Do func is used to connect to server
+func Do(keyPath string, keyPassword string, user string, password string, host string, port int, sshTimeout int) (*ssh.Client, error) {
 	var (
 		authMethod   []ssh.AuthMethod
 		addr         string
@@ -41,7 +41,7 @@ func Do(keyPath string, keyPassword string, user string, password string, host s
 	clientConfig = &ssh.ClientConfig{
 		User:            user,
 		Auth:            authMethod,
-		Timeout:         30 * time.Second,
+		Timeout:         time.Duration(sshTimeout) * time.Second,
 		Config:          config,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
