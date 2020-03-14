@@ -18,7 +18,7 @@ package cmd
 
 import (
 	"fmt"
-	"gansible/pkg/utils"
+	"gansible/pkg/connect"
 	"log"
 	"os"
 
@@ -30,17 +30,15 @@ import (
 // shellCmd represents the shell command
 var shellCmd = &cobra.Command{
 	Use:   "shell",
-	Short: "Open a remote shell session to remote machine",
-	Long:  `Open a remote shell session to remote machine,so that you can execute command just like in localhost.`,
+	Short: "Open a remote shell session to remote node",
+	Long:  `Open a remote shell session to remote node,so that you can execute command just like in localhost.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		passwords := utils.GetPassword(pwdFile)
-		host := args[0]
-		fmt.Println("Host:", host)
-		var client *ssh.Client
-		client, _ = utils.TryPasswords("root", passwords, host, 22, sshTimeout)
-		if client == nil {
-			fmt.Println("All passwords are wrong.")
+		node := args[0]
+		fmt.Println("Node:", node)
+		client, err := connect.Do(keyPath, keyPassword, user, password, node, port, sshTimeout, pwdFile)
+		if err != nil {
+			fmt.Println("login failed")
 		} else {
 			defer client.Close()
 			session, err := client.NewSession()
