@@ -18,7 +18,7 @@ import (
 )
 
 //Do func is used to connect to server
-func Do(keyPath string, keyPassword string, user string, password string, host string, port int, sshTimeout int, pwdFile string) (*ssh.Client, error) {
+func Do(keyPath string, keyPassword string, user string, password string, node string, port int, sshTimeout int, pwdFile string) (*ssh.Client, error) {
 	var (
 		authMethod   []ssh.AuthMethod
 		addr         string
@@ -42,11 +42,11 @@ func Do(keyPath string, keyPassword string, user string, password string, host s
 		Config:          config,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
-	addr = fmt.Sprintf("%s:%d", host, port)
+	addr = fmt.Sprintf("%s:%d", node, port)
 	auth := GetAuthMethod(keyPath, keyPassword, password)
 	if auth == nil {
 		passwords := GetPassword(pwdFile)
-		client, err := TryPasswords(user, passwords, host, port, sshTimeout)
+		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
 			return nil, err
 		}
@@ -55,7 +55,7 @@ func Do(keyPath string, keyPassword string, user string, password string, host s
 	clientConfig.Auth = append(clientConfig.Auth, auth)
 	if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
 		passwords := GetPassword(pwdFile)
-		client, err := TryPasswords(user, passwords, host, port, sshTimeout)
+		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
 			return nil, err
 		}
@@ -190,7 +190,7 @@ func GetPassword(pwdFile string) []string {
 }
 
 //TryPasswords ssh to a machine using a set of possible passwords concurrently.
-func TryPasswords(user string, passwords []string, host string, port int, sshTimeout int) (*ssh.Client, error) {
+func TryPasswords(user string, passwords []string, node string, port int, sshTimeout int) (*ssh.Client, error) {
 	timer := time.NewTimer(time.Duration(sshTimeout) * time.Second)
 	defer timer.Stop()
 	ch := make(chan *ssh.Client)
@@ -201,7 +201,7 @@ func TryPasswords(user string, passwords []string, host string, port int, sshTim
 	errAllPassWrong := fmt.Errorf("All passwords are wrong")
 	for _, password := range passwords {
 		go func(password string) {
-			c, err := WithPass(user, password, host, port, sshTimeout)
+			c, err := WithPass(user, password, node, port, sshTimeout)
 			if err == nil {
 				ch <- c
 			} else {
@@ -225,7 +225,7 @@ func TryPasswords(user string, passwords []string, host string, port int, sshTim
 }
 
 //WithPass connect server with password
-func WithPass(user string, password string, host string, port int, sshTimeout int) (*ssh.Client, error) {
+func WithPass(user string, password string, node string, port int, sshTimeout int) (*ssh.Client, error) {
 	var (
 		authMethod   []ssh.AuthMethod
 		addr         string
@@ -243,7 +243,7 @@ func WithPass(user string, password string, host string, port int, sshTimeout in
 		Config:          config,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
-	addr = fmt.Sprintf("%s:%d", host, port)
+	addr = fmt.Sprintf("%s:%d", node, port)
 	if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
 		return nil, err
 	}
