@@ -5,11 +5,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"gansible/pkg/autologin"
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/pkg/sftp"
-	"golang.org/x/crypto/ssh"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"net"
@@ -18,8 +13,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
+
+	"github.com/pkg/sftp"
+	"golang.org/x/crypto/ssh"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -368,69 +366,6 @@ func ParseIP(ipFile, ipStr string) ([]string, error) {
 	}
 	ip = append(ip, fileip...)
 	return ip, nil
-}
-
-//GetPassword  parse password file and store passwords into slice
-func GetPassword(pwdFile string) []string {
-	passwords := []string{}
-	if pwdFile == "" {
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println("get homedir error:", err)
-			return nil
-		}
-		pwdFile = path.Join(home, ".pwdfile")
-	}
-	file, err := os.Open(pwdFile)
-	if err != nil {
-		log.Printf("can not open passowrd file: %s, err: [%v]", pwdFile, err)
-		return nil
-	}
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		passwords = append(passwords, scanner.Text())
-	}
-	if err := scanner.Err(); err != nil {
-		log.Printf("Cannot scanner file: %s, err: [%v]", pwdFile, err)
-		return nil
-	}
-	return passwords
-}
-
-//TryPasswords ssh to a machine using a set of possible passwords concurrently.
-func TryPasswords(user string, passwords []string, host string, port int, sshTimeout int) (*ssh.Client, error) {
-	timer := time.NewTimer(time.Duration(sshTimeout) * time.Second)
-	defer timer.Stop()
-	ch := make(chan *ssh.Client)
-	count := 0
-	var mutex sync.Mutex
-	finish := make(chan bool)
-	errTimeout := fmt.Errorf("Time out in %d seconds", sshTimeout)
-	errAllPassWrong := fmt.Errorf("All passwords are wrong")
-	for _, password := range passwords {
-		go func(password string) {
-			c, err := autologin.Connect("root", password, host, 22)
-			if err == nil {
-				ch <- c
-			} else {
-				mutex.Lock()
-				count = count + 1
-				if count == len(passwords) {
-					finish <- true
-				}
-				mutex.Unlock()
-			}
-		}(password)
-	}
-	select {
-	case client := <-ch:
-		return client, nil
-	case <-finish:
-		return nil, errAllPassWrong
-	case <-timer.C:
-		return nil, errTimeout
-	}
 }
 
 //Execute run given commands  on  ssh clinet then return ExecResult
