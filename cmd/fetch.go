@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"gansible/pkg/connect"
 	"gansible/pkg/utils"
 	"path"
 	"reflect"
@@ -32,10 +33,9 @@ import (
 // fetchCmd represents the fetch command
 var fetchCmd = &cobra.Command{
 	Use:   "fetch",
-	Short: "Download file from remote host",
-	Long:  `Download file from remote host.`,
+	Short: "Download file from remote node",
+	Long:  `Download file from remote node.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		passwords := utils.GetPassword(pwdFile)
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
 		ip, err := utils.ParseIP(nodeFile, nodes)
@@ -52,11 +52,11 @@ var fetchCmd = &cobra.Command{
 				return
 			}
 			result := make(chan utils.NodeResult, len(ip))
-			p, _ := ants.NewPoolWithFunc(forks, func(host interface{}) {
+			p, _ := ants.NewPoolWithFunc(forks, func(node interface{}) {
 				noder := utils.NodeResult{}
-				noder.Node = reflect.ValueOf(host).String()
+				noder.Node = reflect.ValueOf(node).String()
 				var client *ssh.Client
-				client, err = utils.TryPasswords("root", passwords, reflect.ValueOf(host).String(), 22, sshTimeout)
+				client, err = connect.Do(keyPath, keyPassword, user, password, reflect.ValueOf(node).String(), port, sshTimeout, pwdFile)
 				if err != nil {
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
@@ -76,7 +76,7 @@ var fetchCmd = &cobra.Command{
 						utils.PrintNodeResult(noder, outputStyle)
 						wg.Done()
 					}
-					noder.Result = utils.Download(sftpClient, src, path.Join(dest, reflect.ValueOf(host).String()))
+					noder.Result = utils.Download(sftpClient, src, path.Join(dest, reflect.ValueOf(node).String()))
 					result <- noder
 					utils.PrintNodeResult(noder, outputStyle)
 					wg.Done()
@@ -89,9 +89,9 @@ var fetchCmd = &cobra.Command{
 					sumr.NodeResult = append(sumr.NodeResult, t)
 				}
 			}()
-			for _, host := range ip {
+			for _, node := range ip {
 				wg.Add(1)
-				p.Invoke(host)
+				p.Invoke(node)
 			}
 			wg.Wait()
 		}
