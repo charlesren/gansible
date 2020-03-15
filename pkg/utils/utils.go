@@ -350,6 +350,19 @@ func ParseIPFile(ipFile string) ([]string, error) {
 	return ip, nil
 }
 
+//RemoveDuplicateString remove duplicate element of string slice.
+func RemoveDuplicateString(sli []string) []string {
+	result := make([]string, 0, len(sli))
+	temp := make(map[string]struct{})
+	for _, item := range sli {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
 //ParseIP parse ip file and ip string use ParseIPFile and ParseStr func then store proper ips into []sting
 func ParseIP(ipFile, ipStr string) ([]string, error) {
 	ip := []string{}
@@ -365,6 +378,7 @@ func ParseIP(ipFile, ipStr string) ([]string, error) {
 		return nil, err
 	}
 	ip = append(ip, fileip...)
+	ip = RemoveDuplicateString(ip)
 	return ip, nil
 }
 
