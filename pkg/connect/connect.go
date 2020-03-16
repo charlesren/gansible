@@ -45,6 +45,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 	addr = fmt.Sprintf("%s:%d", node, port)
 	auth := GetAuthMethod(keyPath, keyPassword, password)
 	if auth == nil {
+		fmt.Println("try given passwords")
 		passwords := GetPassword(pwdFile)
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
