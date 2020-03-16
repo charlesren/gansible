@@ -74,17 +74,17 @@ func PublicKeyAuth(keyPath string) ssh.AuthMethod {
 	}
 	keyFile, err := homedir.Expand(keyPath)
 	if err != nil {
-		log.Println("find key's home dir failed", err)
+		fmt.Println("find key's home dir failed", err)
 		return nil
 	}
 	key, err := ioutil.ReadFile(keyFile)
 	if err != nil {
-		log.Println("read ssh key file failed", err)
+		fmt.Println("read ssh key file failed", err)
 		return nil
 	}
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
-		log.Println("get signer failed", err)
+		fmt.Println("get signer failed", err)
 		return nil
 	}
 	return ssh.PublicKeys(signer)
@@ -97,17 +97,17 @@ func PublicKeyWithPasswordAuth(keyPath string, keyPassword string) ssh.AuthMetho
 	}
 	keyFile, err := homedir.Expand(keyPath)
 	if err != nil {
-		log.Println("find key's home dir failed", err)
+		fmt.Println("find key's home dir failed", err)
 		return nil
 	}
 	key, err := ioutil.ReadFile(keyFile)
 	if err != nil {
-		log.Println("read ssh key file failed", err)
+		fmt.Println("read ssh key file failed", err)
 		return nil
 	}
 	signer, err := ssh.ParsePrivateKeyWithPassphrase(key, []byte(keyPassword))
 	if err != nil {
-		log.Println("get signer failed", err)
+		fmt.Println("get signer failed", err)
 		return nil
 	}
 	return ssh.PublicKeys(signer)
@@ -118,7 +118,7 @@ func PublicKeyWithSSHAgentAuth() ssh.AuthMethod {
 	socket := os.Getenv("SSH_AUTH_SOCK")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
-		log.Println("Failed to open SSH_AUTH_SOCK:", err)
+		fmt.Println("Failed to open SSH_AUTH_SOCK:", err)
 		return nil
 	}
 	agentClient := agent.NewClient(conn)
