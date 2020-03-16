@@ -150,8 +150,8 @@ func GetAuthMethod(keyPath string, keyPassword string, password string) ssh.Auth
 		return PublicKeyWithSSHAgentAuth()
 	}
 	defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
-	fmt.Printf("find default key's home dir failed: %s", err)
 	if err != nil {
+		fmt.Printf("find default key's home dir failed: %s", err)
 		return nil
 	}
 	if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
