@@ -45,7 +45,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 	addr = fmt.Sprintf("%s:%d", node, port)
 	auth := GetAuthMethod(keyPath, keyPassword, password)
 	if auth == nil {
-		fmt.Println("try given passwords")
+		//fmt.Println("try given passwords")
 		passwords := GetPassword(pwdFile)
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
@@ -56,7 +56,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 	clientConfig.Auth = append(clientConfig.Auth, auth)
 	client, err = ssh.Dial("tcp", addr, clientConfig)
 	if err != nil {
-		fmt.Println("private key auth failed,try given passwords")
+		//fmt.Println("private key auth failed,try given passwords")
 		passwords := GetPassword(pwdFile)
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
@@ -74,17 +74,17 @@ func PublicKeyAuth(keyPath string) ssh.AuthMethod {
 	}
 	keyFile, err := homedir.Expand(keyPath)
 	if err != nil {
-		fmt.Println("find key's home dir failed", err)
+		//fmt.Println("find key's home dir failed", err)
 		return nil
 	}
 	key, err := ioutil.ReadFile(keyFile)
 	if err != nil {
-		fmt.Println("read ssh key file failed", err)
+		//fmt.Println("read ssh key file failed", err)
 		return nil
 	}
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
-		fmt.Println("get signer failed", err)
+		//fmt.Println("get signer failed", err)
 		return nil
 	}
 	return ssh.PublicKeys(signer)
@@ -97,17 +97,17 @@ func PublicKeyWithPasswordAuth(keyPath string, keyPassword string) ssh.AuthMetho
 	}
 	keyFile, err := homedir.Expand(keyPath)
 	if err != nil {
-		fmt.Println("find key's home dir failed", err)
+		//fmt.Println("find key's home dir failed", err)
 		return nil
 	}
 	key, err := ioutil.ReadFile(keyFile)
 	if err != nil {
-		fmt.Println("read ssh key file failed", err)
+		//fmt.Println("read ssh key file failed", err)
 		return nil
 	}
 	signer, err := ssh.ParsePrivateKeyWithPassphrase(key, []byte(keyPassword))
 	if err != nil {
-		fmt.Println("get signer failed", err)
+		//fmt.Println("get signer failed", err)
 		return nil
 	}
 	return ssh.PublicKeys(signer)
@@ -118,7 +118,7 @@ func PublicKeyWithSSHAgentAuth() ssh.AuthMethod {
 	socket := os.Getenv("SSH_AUTH_SOCK")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
-		fmt.Println("Failed to open SSH_AUTH_SOCK:", err)
+		//fmt.Println("Failed to open SSH_AUTH_SOCK:", err)
 		return nil
 	}
 	agentClient := agent.NewClient(conn)
@@ -145,11 +145,11 @@ func GetAuthMethod(keyPath string, keyPassword string, password string) ssh.Auth
 	if keyPassword != "" {
 		defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
 		if err != nil {
-			fmt.Println("find default key's home dir failed: ", err)
+			//fmt.Println("find default key's home dir failed: ", err)
 			return nil
 		}
 		if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
-			fmt.Println("default key file is not exist: ", err)
+			//fmt.Println("default key file is not exist: ", err)
 			return nil
 		}
 		return PublicKeyWithPasswordAuth(defaultKeyFile, keyPassword)
@@ -161,11 +161,11 @@ func GetAuthMethod(keyPath string, keyPassword string, password string) ssh.Auth
 	}
 	defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
 	if err != nil {
-		fmt.Println("find default key's home dir failed: ", err)
+		//fmt.Println("find default key's home dir failed: ", err)
 		return nil
 	}
 	if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
-		fmt.Println("default key file is not exist: ", err)
+		//fmt.Println("default key file is not exist: ", err)
 		return nil
 	}
 	return PublicKeyAuth(defaultKeyFile)
