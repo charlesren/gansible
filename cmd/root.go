@@ -79,7 +79,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&logDir, "log-dir", "", "dir to save log file")
 	rootCmd.PersistentFlags().StringVar(&logFileName, "log-file-name", "", "define name of log file")
 	rootCmd.PersistentFlags().StringVarP(&outputStyle, "output", "o", "gansible", "gansible output style: gansible/json/yaml")
-	rootCmd.PersistentFlags().StringVar(&keyPath, "keyPath", "~/.ssh/id_rsa", "ssh private key file path")
+	rootCmd.PersistentFlags().StringVar(&keyPath, "keyPath", "", "ssh private key file path")
 	rootCmd.PersistentFlags().StringVar(&keyPassword, "keyPassword", "", "password of ssh private key")
 	rootCmd.PersistentFlags().StringVarP(&user, "user", "u", "", "user used to login remote server")
 	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "password of remote server")
