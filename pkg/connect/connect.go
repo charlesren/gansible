@@ -137,11 +137,11 @@ func GetAuthMethod(keyPath string, keyPassword string, password string) ssh.Auth
 	if keyPassword != "" {
 		defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
 		if err != nil {
-			fmt.Printf("find default key's home dir failed: %s", err)
+			fmt.Println("find default key's home dir failed: ", err)
 			return nil
 		}
 		if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
-			fmt.Printf("default key file is not exist: %s", err)
+			fmt.Println("default key file is not exist: ", err)
 			return nil
 		}
 		return PublicKeyWithPasswordAuth(defaultKeyFile, keyPassword)
@@ -153,11 +153,11 @@ func GetAuthMethod(keyPath string, keyPassword string, password string) ssh.Auth
 	}
 	defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
 	if err != nil {
-		fmt.Printf("find default key's home dir failed: %s", err)
+		fmt.Println("find default key's home dir failed: ", err)
 		return nil
 	}
 	if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
-		fmt.Printf("default key file is not exist: %s", err)
+		fmt.Println("default key file is not exist: ", err)
 		return nil
 	}
 	return PublicKeyAuth(defaultKeyFile)
