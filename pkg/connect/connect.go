@@ -53,7 +53,9 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 		return client, nil
 	}
 	clientConfig.Auth = append(clientConfig.Auth, auth)
-	if client, err = ssh.Dial("tcp", addr, clientConfig); err != nil {
+	client, err = ssh.Dial("tcp", addr, clientConfig)
+	if err != nil {
+		fmt.Println("private key auth failed,try given passwords")
 		passwords := GetPassword(pwdFile)
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
@@ -71,15 +73,15 @@ func PublicKeyAuth(keyPath string) ssh.AuthMethod {
 	}
 	keyFile, err := homedir.Expand(keyPath)
 	if err != nil {
-		log.Fatal("find key's home dir failed", err)
+		log.Println("find key's home dir failed", err)
 	}
 	key, err := ioutil.ReadFile(keyFile)
 	if err != nil {
-		log.Fatal("read ssh key file failed", err)
+		log.Println("read ssh key file failed", err)
 	}
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
-		log.Fatal("get signer failed", err)
+		log.Println("get signer failed", err)
 	}
 	return ssh.PublicKeys(signer)
 }
@@ -91,15 +93,15 @@ func PublicKeyWithPasswordAuth(keyPath string, keyPassword string) ssh.AuthMetho
 	}
 	keyFile, err := homedir.Expand(keyPath)
 	if err != nil {
-		log.Fatal("find key's home dir failed", err)
+		log.Println("find key's home dir failed", err)
 	}
 	key, err := ioutil.ReadFile(keyFile)
 	if err != nil {
-		log.Fatal("read ssh key file failed", err)
+		log.Println("read ssh key file failed", err)
 	}
 	signer, err := ssh.ParsePrivateKeyWithPassphrase(key, []byte(keyPassword))
 	if err != nil {
-		log.Fatal("get signer failed", err)
+		log.Println("get signer failed", err)
 	}
 	return ssh.PublicKeys(signer)
 }
@@ -109,7 +111,7 @@ func PublicKeyWithSSHAgentAuth() ssh.AuthMethod {
 	socket := os.Getenv("SSH_AUTH_SOCK")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
-		log.Fatalf("Failed to open SSH_AUTH_SOCK: %v", err)
+		log.Println("Failed to open SSH_AUTH_SOCK:", err)
 	}
 	agentClient := agent.NewClient(conn)
 	return ssh.PublicKeysCallback(agentClient.Signers)
