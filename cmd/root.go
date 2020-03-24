@@ -75,7 +75,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gansible.yaml)")
 	rootCmd.PersistentFlags().IntVar(&forks, "forks", 5, "number of concurrenrt tasks")
 	rootCmd.PersistentFlags().BoolVarP(&loging, "loging", "", false, "save result log")
-	rootCmd.PersistentFlags().StringVar(&logFileFormat, "log-file-format", "log", "log file format: log/json/yaml/csv")
+	rootCmd.PersistentFlags().StringVar(&logFileFormat, "log-file-format", "csv", "log file format: log/json/yaml/csv")
 	rootCmd.PersistentFlags().StringVar(&logDir, "log-dir", "", "dir to save log file")
 	rootCmd.PersistentFlags().StringVar(&logFileName, "log-file-name", "", "define name of log file")
 	rootCmd.PersistentFlags().StringVarP(&outputStyle, "output", "o", "gansible", "gansible output style: gansible/json/yaml")
