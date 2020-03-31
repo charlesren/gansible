@@ -5,11 +5,9 @@ WORKDIR  /data
 RUN echo "http://mirrors.aliyun.com/alpine/latest-stable/main/" > /etc/apk/repositories
 RUN echo "http://mirrors.aliyun.com/alpine/latest-stable/community/" >> /etc/apk/repositories
  
-# 更新源、安装openssh 并修改配置文件和生成key 并且同步时间
 RUN apk update && \
     mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2 
  
 COPY gansible  /sbin/gansible
 #EXPOSE 22
- 
 #CMD ["/usr/sbin/sshd", "-D"]
