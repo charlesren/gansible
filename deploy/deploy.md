@@ -1,5 +1,5 @@
-####容器方式安装
-###打包
+### 容器方式安装
+#### 打包
 1. cd ~ && mkdir gansible && cd gansible
 2. 把gansible二进制文件拷到本目录
 3. 把Dockerfile拷到本地
@@ -10,15 +10,15 @@
          把ssh-key 拷到本目录;Dockerfile 添加如下内容 COPY id_rsa   /root/.ssh/id_rsa
          把.pwdfile拷到本目录;Dockerfile 添加如下内容 COPY .pwdfile    /root/.pwdfile
 5. docker build -t gansible .
-###启动
+#### 启动
 6. docker run --name gansible -it -v  /root:/root gansible
-###停止
+#### 停止
 docker stop gansible
-###删除
+#### 删除
 docker rm gansible
 docker rmi gansible
-###问题
-1.出现/bin/sh: ./gansible: not found报错
+#### 问题
+1. 出现/bin/sh: ./gansible: not found报错
 原因:alpine使用musl libc与gnu libc部分不兼容
 参考https://blog.csdn.net/liumiaocn/article/details/89702529
 解决方案：
