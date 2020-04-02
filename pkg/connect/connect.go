@@ -218,6 +218,7 @@ func TryPasswords(user string, passwords []string, node string, port int, sshTim
 				mutex.Lock()
 				count = count + 1
 				if count == len(passwords) {
+					fmt.Println(err)
 					finish <- true
 				}
 				mutex.Unlock()
