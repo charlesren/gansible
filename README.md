@@ -29,13 +29,13 @@ Gansible is a lightweight cli tool designed for system administrator.
 
 
 ## 安装
-### Linux 系统编译安装
+- ### Linux 系统编译安装
 - git clone https://github.com/charlesren/gansible.git
 - 在源码目录下执行go build生成gansible二进制文件
 1.  cp gansible /usr/bin/gansible
 2. 设置默认密码文件。Gansible会尝试使用密码文件中的密码登录服务器。默认密码文件位置 ~/.pwdfile.每个密码占一行。若无默认文件，运行时可通过--pwdfile 参数指定密码文件。
 
-### 容器方式安装
+- ### 容器方式安装
 #### 打包
 1. cd ~ && mkdir gansible && cd gansible
 2. 把gansible二进制文件拷到本目录
