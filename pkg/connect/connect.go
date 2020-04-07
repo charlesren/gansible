@@ -8,7 +8,7 @@ import (
 	"net"
 	"os"
 	osuser "os/user"
-	"path"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -180,7 +180,7 @@ func GetPassword(pwdFile string) []string {
 			fmt.Println("get homedir error:", err)
 			return nil
 		}
-		pwdFile = path.Join(home, ".pwdfile")
+		pwdFile = filepath.Join(home, ".pwdfile")
 	}
 	file, err := os.Open(pwdFile)
 	if err != nil {
