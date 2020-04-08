@@ -19,7 +19,7 @@ Gansible is a lightweight cli tool designed for system administrator.
 7. 支持密码、秘钥、ssh agent 及尝试使用密码文件中一组给定的密码登录。根据输入参数自动选择登录方式，优先顺序（指定的密码>秘钥>密码文件）。
 8. 从字符串或文件解析IP,且自动去重。
 9. 指定每台设备上任务超时时间。  
-   通过--timeout参数指定。
+   通过--timeout参数指定（默认300s)。
 
 ### **计划中**
 1. 多颜色展示输出。
