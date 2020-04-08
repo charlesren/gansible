@@ -32,9 +32,19 @@ Gansible is a lightweight cli tool designed for system administrator.
 ### 1. 准备二进制文件
 - git clone https://github.com/charlesren/gansible.git
 - 在源码目录下执行如下命令生成gansible二进制文件
+*Linux系统*
 ```
 GOOS=linux go build
 ```
+*Windows系统*
+```
+GOOS=windows go build
+```
+*Mac系统*
+```
+GOOS=darwin go build
+```
+
 ### 2. 安装
 - 容器方式
 1. cd ~ && mkdir gansible && cd gansible
