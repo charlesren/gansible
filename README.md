@@ -29,17 +29,15 @@ Gansible is a lightweight cli tool designed for system administrator.
 
 
 ## 安装
-### Linux 系统编译安装
+### 1. 准备二进制文件
 - git clone https://github.com/charlesren/gansible.git
 - 在源码目录下执行如下命令生成gansible二进制文件
 ```
 GOOS=linux go build
 ```
-1.  cp gansible /usr/bin/gansible
-2. 设置默认密码文件。Gansible会尝试使用密码文件中的密码登录服务器。默认密码文件位置 ~/.pwdfile.每个密码占一行。若无默认文件，运行时可通过--pwdfile 参数指定密码文件。
-
-### 容器方式安装
-#### 打包
+### 2. 安装
+####  _ 容器方式
+##### 打包
 1. cd ~ && mkdir gansible && cd gansible
 2. 把gansible二进制文件拷到本目录
 3. 把Dockerfile拷到本地
@@ -50,8 +48,13 @@ GOOS=linux go build
          把ssh-key 拷到本目录;Dockerfile 添加如下内容 COPY id_rsa   /root/.ssh/id_rsa
          把.pwdfile拷到本目录;Dockerfile 添加如下内容 COPY .pwdfile    /root/.pwdfile
 5. docker build -t gansible .
-#### 启动
+##### 启动
 6. docker run --name gansible -it -v  /root:/root gansible
+#### _ 二进制安装
+##### Linux 系统安装
+1.  cp gansible /usr/bin/gansible
+2. 设置默认密码文件。Gansible会尝试使用密码文件中的密码登录服务器。默认密码文件位置 ~/.pwdfile.每个密码占一行。若无默认文件，运行时可通过--pwdfile 参数指定密码文件。
+
 ## 使用说明
 查看使用帮助
 1. 查看帮助
