@@ -307,9 +307,9 @@ Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
 ```
 [root@localhost gansible]# tree /tmp/4
 /tmp/4
-|-- a.sh
-`-- b
-    `-- c
+├── a.sh
+└── b
+    └── c
 
 1 directory, 2 files
 [root@localhost gansible]# 
