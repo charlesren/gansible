@@ -171,7 +171,7 @@ Total(1) : Success=0    Failed=0    Unreachable=0    Skipped=0
 
 保存任务日志：
 ```
-[root@localhost gansible]# gansible run -n 127.0.0.1-3 -c hostname --loging --log-file-format csv
+[root@localhost gansible]# gansible run -n 127.0.0.1-3 -c hostname --loging
 127.0.0.1 | Success | rc=0 >>
 localhost.localdomain
 
