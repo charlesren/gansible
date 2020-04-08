@@ -72,14 +72,16 @@ GOOS=darwin go build
 echo > .pwdfile
 ```
 ## 使用说明
-查看使用帮助
-** 1. 查看帮助 **
+1. **查看帮助**
+```
 gansible -h
-
-** 2. 自动登录到远程服务器，并启动一个窗口交互执行指令。**
+```
+2. 自动登录到远程服务器，并启动一个窗口交互执行指令。
+```
 gansilbe shell 127.0.0.1
+```
 
-** 3. 执行命令。**
+3. 执行命令。
 有如下两种方式指定一个或多个设备。
 - 通过-n 参数指定机器列表。
 可以解析10.0.0.1或10.0.0.2-5或10.0.0.6-10.0.0.8格式的ip。三种格式可以自由组合，以;分隔。
@@ -177,7 +179,7 @@ Cost Time: 794.775125ms
 Total(3) : Success=3    Failed=0    Unreachable=0    Skipped=0
 save log to file: /tmp/gansible_2020-03-05_16:01:44.csv successfully!
 ```
-** 4. 执行本地脚本。**
+4. 执行本地脚本。
 
 本地脚本文件内容如下：
 ```
@@ -218,7 +220,7 @@ args
 /tmp
 [root@localhost gansible]# 
 ```
-** 5. 下载文件或目录。需指定dest及src两个参数。**
+5. 下载文件或目录。需指定dest及src两个参数。
 
 下载文件:
 ```
@@ -273,7 +275,7 @@ total 0
 -rw-r--r--. 1 root root 0 Mar  4 12:49 b.sh
 [root@localhost gansible]# 
 ```
-** 6. 上传文件或目录。需指定dest及src两个参数。**
+6. 上传文件或目录。需指定dest及src两个参数。
 
 上传文件:
 ```
