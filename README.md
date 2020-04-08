@@ -5,7 +5,7 @@
 Gansible is a lightweight cli tool designed for system administrator.  
 可并发在一组服务器上执行命令、上传下载文件或目录、执行本地脚本。
 
-- 特性：
+### 主要特性
 1. 并发在多个设备上执行任务。默认5个并发，可通过--forks参数设定并发数量，最大10000。
 2. 可设置ssh连接超时时间。默认30秒，可通过--ssh-timeout参数设定。
 3. 以gansible、json、yaml格式输出任务结果,默认gansible。
@@ -21,10 +21,10 @@ Gansible is a lightweight cli tool designed for system administrator.
 9. 指定每台设备上任务超时时间。  
    通过--timeout参数指定。
 
-- 计划中：
+**### 计划中**
 1. 多颜色展示输出。
 
-- 目前主要功能如下：
+### 主要功能
 1. 支持密码、秘钥、ssh agent登录，当失败时会尝试使用密码文件中的密码自动登录服务器，并交换操作。支持命令补全、上箭头、信号处理（Ctrl + C ，Ctrl + D）。
 2. 上传文件或目录到远程服务器。目标文件夹不存在会自动创建。若源为文件，则把源文件上传到指定文件夹。若源为目录，则把目录下的文件及文件夹上传到指定文件夹。
 3. 从远程服务器上下载文件或目录到本地。会在指定的本地文件夹内为每台主机新建一个以该主机IP地址为名称的文件夹。
