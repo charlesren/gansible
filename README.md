@@ -49,10 +49,16 @@ GOOS=linux go build
 5. docker build -t gansible .
 6. docker run --name gansible -it -v  /root:/root gansible
 - 二进制方式安装
-#### Linux 系统安装
+#### *Linux 系统*
 1.  cp gansible /usr/bin/gansible
 2. 设置默认密码文件。Gansible会尝试使用密码文件中的密码登录服务器。默认密码文件位置 ~/.pwdfile.每个密码占一行。若无默认文件，运行时可通过--pwdfile 参数指定密码文件。
 
+#### *Windows系统*
+1. 把gansible.exe文件拷贝到C:\Windows下。
+2. 打开新的命令提示符窗口，输入以下命令生成密码文件(当前用户的根目录下）。编辑密码文件添加相关密码。
+```
+echo > .pwdfile
+```
 ## 使用说明
 查看使用帮助
 1. 查看帮助
