@@ -3,7 +3,7 @@
 ## 介绍
 
 Gansible is a lightweight cli tool designed for system administrator.  
-可并发在一组服务器上执行命令、上传文件、下载文件、执行本地脚本。
+可并发在一组服务器上执行命令、上传下载文件或目录、执行本地脚本。
 
 - 特性：
 1. 并发在多个设备上执行任务。默认5个并发，可通过--forks参数设定并发数量，最大10000。
