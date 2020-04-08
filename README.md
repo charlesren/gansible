@@ -21,7 +21,7 @@ Gansible is a lightweight cli tool designed for system administrator.
 9. 指定每台设备上任务超时时间。  
    通过--timeout参数指定。
 
-**### 计划中**
+### **计划中**
 1. 多颜色展示输出。
 
 ### 主要功能
