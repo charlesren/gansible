@@ -243,11 +243,14 @@ total 4
 ```
 下载目录:
 ```
-[root@localhost gansible]# ls -rtl /data/scm/gansible/testdir
-total 0
--rw-r--r--. 1 root root  0 Mar  4 12:46 test.sh
-drwxr-xr-x. 2 root root 18 Mar  4 12:47 a
--rw-r--r--. 1 root root  0 Mar  4 12:47 c.sh
+[root@localhost gansible]# tree /data/scm/gansible/testdir
+/data/scm/gansible/testdir
+├── a.sh
+└── b
+    └── c
+
+1 directory, 2 files
+[root@localhost gansible]#
 ```
 ```
 [root@localhost gansible]# gansible fetch -n 127.0.0.1 -s /data/scm/gansible/testdir -d /tmp/2
@@ -259,28 +262,21 @@ Cost Time: 428.766883ms
 Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
 ```
 ```
-[root@localhost gansible]# ls -rtl /tmp/2
-total 0
-drwxr-xr-x. 3 root root 42 Mar  4 12:49 127.0.0.1
-```
-```
-[root@localhost gansible]# ls -rtl /tmp/2/127.0.0.1
-total 0
--rw-r--r--. 1 root root  0 Mar  4 12:49 test.sh
-drwxr-xr-x. 2 root root 18 Mar  4 12:49 a
--rw-r--r--. 1 root root  0 Mar  4 12:49 c.sh
-```
-```
-[root@localhost gansible]# ls -rtl /tmp/2/127.0.0.1/a
-total 0
--rw-r--r--. 1 root root 0 Mar  4 12:49 b.sh
-[root@localhost gansible]# 
+[root@localhost gansible]# tree /tmp/2
+/tmp/2
+└── 127.0.0.1
+    ├── a.sh
+    └── b
+        └── c
+
+2 directories, 2 files
+[root@localhost gansible]#
 ```
 **6. 上传文件或目录。需指定dest及src两个参数。**
 
 上传文件:
 ```
-[root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/date.sh -d /tmp/1
+[root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/date.sh -d /tmp/3
 127.0.0.1 | Success | rc=0 >>
 upload successfully!
 
@@ -289,14 +285,18 @@ Cost Time: 399.632118ms
 Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
 ```
 ```
-[root@localhost gansible]# ls -rtl /tmp/1
+[root@localhost gansible]# ls -rtl /tmp/3
 total 4
 -rw-r--r--. 1 root root 52 Mar  4 14:39 date.sh
 [root@localhost gansible]# 
 ```
 上传目录:
 ```
-[root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/testdir -d /tmp/2
+[root@localhost gansible]# ls /tmp/4
+ls: cannot access /tmp/4: No such file or directory
+```
+```
+[root@localhost gansible]# gansible push -n 127.0.0.1 -s /data/scm/gansible/testdir -d /tmp/4
 127.0.0.1 | Success | rc=0 >>
 upload successfully!
 
@@ -305,11 +305,13 @@ Cost Time: 427.764754ms
 Total(1) : Success=1    Failed=0    Unreachable=0    Skipped=0
 ```
 ```
-[root@localhost gansible]# ls -rtl /tmp/2
-total 0
-drwxr-xr-x. 2 root root 18 Mar  4 14:42 a
--rw-r--r--. 1 root root  0 Mar  4 14:42 c.sh
--rw-r--r--. 1 root root  0 Mar  4 14:42 test.sh
+[root@localhost gansible]# tree /tmp/4
+/tmp/4
+|-- a.sh
+`-- b
+    `-- c
+
+1 directory, 2 files
 [root@localhost gansible]# 
 ```
 #### 参与贡献
