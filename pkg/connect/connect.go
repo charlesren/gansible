@@ -43,9 +43,70 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 	addr = fmt.Sprintf("%s:%d", node, port)
-	auth := GetAuthMethod(keyPath, keyPassword, password)
-	if auth == nil {
-		//fmt.Println("try given passwords")
+
+	var auth ssh.AuthMethod
+	//password is assigned
+	if password != "" {
+		auth = ssh.Password(password)
+		clientConfig.Auth = append(clientConfig.Auth, auth)
+		client, err = ssh.Dial("tcp", addr, clientConfig)
+		if err != nil {
+			return nil, err
+		}
+		return client, nil
+	}
+
+	//password is not assigned; keyPath is assigned
+	if keyPath != "" {
+		if keyPassword != "" {
+			auth = PublicKeyWithPasswordAuth(keyPath, keyPassword)
+		}
+		auth = PublicKeyAuth(keyPath)
+		clientConfig.Auth = append(clientConfig.Auth, auth)
+		client, err = ssh.Dial("tcp", addr, clientConfig)
+		if err != nil {
+			return nil, err
+		}
+		return client, nil
+	}
+
+	//password is not assigned; keyPath is not assigned;keyPassword is assigned
+	if keyPassword != "" {
+		defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
+		if err != nil {
+			fmt.Println("find default key's home dir failed: ", err)
+			return nil, err
+		}
+		if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
+			fmt.Println("default key file is not exist: ", err)
+			return nil, err
+		}
+		auth = PublicKeyWithPasswordAuth(defaultKeyFile, keyPassword)
+		clientConfig.Auth = append(clientConfig.Auth, auth)
+		client, err = ssh.Dial("tcp", addr, clientConfig)
+		if err != nil {
+			return nil, err
+		}
+		return client, nil
+	}
+
+	//password is not assigned; keyPath is not assigned;keyPassword is not assigned;ssh agent is configed
+	if socket := os.Getenv("SSH_AUTH_SOCK"); socket != "" {
+		auth = PublicKeyWithSSHAgentAuth()
+		clientConfig.Auth = append(clientConfig.Auth, auth)
+		client, err = ssh.Dial("tcp", addr, clientConfig)
+		if err != nil {
+			return nil, err
+		}
+		return client, nil
+	}
+
+	//password is not assigned; keyPath is not assigned;keyPassword is not assigned;ssh agent is not configed
+	//try use PublicKeyAuth first ,if faild try default passwords
+	defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
+	if err != nil {
+		fmt.Println("find default key's home dir failed: ", err)
+		//try default passwords
 		passwords := GetPassword(pwdFile)
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
@@ -53,10 +114,21 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 		}
 		return client, nil
 	}
+	if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
+		fmt.Println("default key file is not exist: ", err)
+		//try default passwords
+		passwords := GetPassword(pwdFile)
+		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
+		if err != nil {
+			return nil, err
+		}
+		return client, nil
+	}
+	auth = PublicKeyAuth(defaultKeyFile)
 	clientConfig.Auth = append(clientConfig.Auth, auth)
 	client, err = ssh.Dial("tcp", addr, clientConfig)
 	if err != nil {
-		//fmt.Println("private key auth failed,try given passwords")
+		//try default passwords
 		passwords := GetPassword(pwdFile)
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
@@ -65,6 +137,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 		return client, nil
 	}
 	return client, nil
+
 }
 
 //DoSilent func is used to connect to server but has no message return . typically useed for connect to server currently.
