@@ -68,7 +68,6 @@ var scriptCmd = &cobra.Command{
 					noder.Result.Out = err.Error()
 					result <- noder
 					utils.PrintNodeResult(noder, outputStyle)
-					wg.Done()
 				} else {
 					defer client.Close()
 					var sftpClient *sftp.Client
@@ -79,7 +78,6 @@ var scriptCmd = &cobra.Command{
 						noder.Result.Out = err.Error()
 						result <- noder
 						utils.PrintNodeResult(noder, outputStyle)
-						wg.Done()
 					}
 					noder.Result = utils.Upload(sftpClient, scriptFile, "/tmp")
 					//tempDir := os.TempDir()
@@ -96,7 +94,6 @@ var scriptCmd = &cobra.Command{
 					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
 					fmt.Println(nrInfo)
-					wg.Done()
 				}
 			})
 			defer p.Release()
@@ -104,6 +101,7 @@ var scriptCmd = &cobra.Command{
 				for i := 0; i <= len(ip); i++ {
 					t := <-result
 					sumr.NodeResult = append(sumr.NodeResult, t)
+					wg.Done()
 				}
 			}()
 			for _, node := range ip {

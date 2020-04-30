@@ -70,13 +70,11 @@ Default timeout of each task is 300 seconds.`,
 					result <- noder
 					fmt.Println(nrInfo)
 					fmt.Printf("\n")
-					wg.Done()
 				} else {
 					defer client.Close()
 					noder.Result = utils.Execute(client, commands, timeout)
 					result <- noder
 					utils.PrintNodeResult(noder, outputStyle)
-					wg.Done()
 				}
 			})
 			defer p.Release()
@@ -84,6 +82,7 @@ Default timeout of each task is 300 seconds.`,
 				for i := 0; i <= len(ip); i++ {
 					t := <-result
 					sumr.NodeResult = append(sumr.NodeResult, t)
+					wg.Done()
 				}
 			}()
 			for _, node := range ip {

@@ -74,12 +74,10 @@ var fetchCmd = &cobra.Command{
 						noder.Result.Out = err.Error()
 						result <- noder
 						utils.PrintNodeResult(noder, outputStyle)
-						wg.Done()
 					}
 					noder.Result = utils.Download(sftpClient, src, path.Join(dest, reflect.ValueOf(node).String()))
 					result <- noder
 					utils.PrintNodeResult(noder, outputStyle)
-					wg.Done()
 				}
 			})
 			defer p.Release()
@@ -87,6 +85,7 @@ var fetchCmd = &cobra.Command{
 				for i := 0; i <= len(ip); i++ {
 					t := <-result
 					sumr.NodeResult = append(sumr.NodeResult, t)
+					wg.Done()
 				}
 			}()
 			for _, node := range ip {
