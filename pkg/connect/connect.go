@@ -316,52 +316,6 @@ func PublicKeyWithSSHAgentAuth() ssh.AuthMethod {
 	return ssh.PublicKeysCallback(agentClient.Signers)
 }
 
-//GetAuthMethod func return ssh.AuthMethod.
-//Only if password is assigned return ssh.Password AuthMethod,otherwise return key related AuthMethod or nil.
-func GetAuthMethod(keyPath string, keyPassword string, password string) ssh.AuthMethod {
-	//password is assigned
-	if password != "" {
-		return ssh.Password(password)
-	}
-
-	//password is not assigned; keyPath is assigned
-	if keyPath != "" {
-		if keyPassword != "" {
-			return PublicKeyWithPasswordAuth(keyPath, keyPassword)
-		}
-		return PublicKeyAuth(keyPath)
-	}
-
-	//password is not assigned; keyPath is not assigned;keyPassword is assigned
-	if keyPassword != "" {
-		defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
-		if err != nil {
-			//fmt.Println("find default key's home dir failed: ", err)
-			return nil
-		}
-		if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
-			//fmt.Println("default key file is not exist: ", err)
-			return nil
-		}
-		return PublicKeyWithPasswordAuth(defaultKeyFile, keyPassword)
-	}
-
-	//password is not assigned; keyPath is not assigned;keyPassword is not assigned
-	if socket := os.Getenv("SSH_AUTH_SOCK"); socket != "" {
-		return PublicKeyWithSSHAgentAuth()
-	}
-	defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
-	if err != nil {
-		//fmt.Println("find default key's home dir failed: ", err)
-		return nil
-	}
-	if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
-		//fmt.Println("default key file is not exist: ", err)
-		return nil
-	}
-	return PublicKeyAuth(defaultKeyFile)
-}
-
 //GetPassword  parse password file and store passwords into slice
 func GetPassword(pwdFile string) []string {
 	passwords := []string{}
