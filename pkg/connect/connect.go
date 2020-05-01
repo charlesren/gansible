@@ -362,6 +362,9 @@ func GetPassword(pwdFile string) []string {
 
 //TryPasswords ssh to a machine using a set of possible passwords concurrently.
 func TryPasswords(user string, passwords []string, node string, port int, sshTimeout int) (*ssh.Client, error) {
+	if passwords == nil {
+		return nil, fmt.Errorf("TryPasswords failed : passwords is nil")
+	}
 	timer := time.NewTimer(time.Duration(sshTimeout) * time.Second)
 	defer timer.Stop()
 	ch := make(chan *ssh.Client)
