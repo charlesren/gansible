@@ -20,7 +20,6 @@ import (
 	"bufio"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"os"
 	osuser "os/user"
@@ -123,7 +122,10 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 	if err != nil {
 		fmt.Println("find default key's home dir failed: ", err)
 		//try default passwords
-		passwords := GetPassword(pwdFile)
+		passwords, err := GetPassword(pwdFile)
+		if err != nil {
+			return nil, err
+		}
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
 			return nil, err
@@ -133,7 +135,10 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 	if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
 		fmt.Println("default key file is not exist: ", err)
 		//try default passwords
-		passwords := GetPassword(pwdFile)
+		passwords, err := GetPassword(pwdFile)
+		if err != nil {
+			return nil, err
+		}
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
 			return nil, err
@@ -145,7 +150,10 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 	client, err = ssh.Dial("tcp", addr, clientConfig)
 	if err != nil {
 		//try default passwords
-		passwords := GetPassword(pwdFile)
+		passwords, err := GetPassword(pwdFile)
+		if err != nil {
+			return nil, err
+		}
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
 			return nil, err
@@ -243,7 +251,10 @@ func DoSilent(keyPath string, keyPassword string, user string, password string, 
 	defaultKeyFile, err := homedir.Expand("~/.ssh/id_rsa")
 	if err != nil {
 		//try default passwords
-		passwords := GetPassword(pwdFile)
+		passwords, err := GetPassword(pwdFile)
+		if err != nil {
+			return nil, err
+		}
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
 			return nil, err
@@ -252,7 +263,10 @@ func DoSilent(keyPath string, keyPassword string, user string, password string, 
 	}
 	if _, err := os.Stat(defaultKeyFile); os.IsNotExist(err) {
 		//try default passwords
-		passwords := GetPassword(pwdFile)
+		passwords, err := GetPassword(pwdFile)
+		if err != nil {
+			return nil, err
+		}
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
 			return nil, err
@@ -264,7 +278,10 @@ func DoSilent(keyPath string, keyPassword string, user string, password string, 
 	client, err = ssh.Dial("tcp", addr, clientConfig)
 	if err != nil {
 		//try default passwords
-		passwords := GetPassword(pwdFile)
+		passwords, err := GetPassword(pwdFile)
+		if err != nil {
+			return nil, err
+		}
 		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
 		if err != nil {
 			return nil, err
@@ -333,20 +350,18 @@ func PublicKeyWithSSHAgentAuth() ssh.AuthMethod {
 }
 
 //GetPassword  parse password file and store passwords into slice
-func GetPassword(pwdFile string) []string {
+func GetPassword(pwdFile string) ([]string, error) {
 	passwords := []string{}
 	if pwdFile == "" {
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println("get homedir error:", err)
-			return nil
+			return nil, fmt.Errorf("get homedir error: %s", err)
 		}
 		pwdFile = filepath.Join(home, ".pwdfile")
 	}
 	file, err := os.Open(pwdFile)
 	if err != nil {
-		log.Printf("can not open passowrd file: %s, err: [%v]", pwdFile, err)
-		return nil
+		return nil, fmt.Errorf("can not open passowrd file: %s, err: [%v]", pwdFile, err)
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
@@ -354,10 +369,9 @@ func GetPassword(pwdFile string) []string {
 		passwords = append(passwords, scanner.Text())
 	}
 	if err := scanner.Err(); err != nil {
-		log.Printf("Cannot scanner file: %s, err: [%v]", pwdFile, err)
-		return nil
+		return nil, fmt.Errorf("Cannot scanner file: %s, err: [%v]", pwdFile, err)
 	}
-	return passwords
+	return passwords, nil
 }
 
 //TryPasswords ssh to a machine using a set of possible passwords concurrently.
