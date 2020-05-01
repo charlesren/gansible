@@ -1,6 +1,5 @@
-//Package cmd ...
 /*
-Copyright © 2020 NAME HERE <EMAIL ADDRESS>
+Copyright © 2019 Chuancheng Ren <renccn@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+//Package cmd is the central point of the gansible application.
+//Gansible commands are defined in this package.
 package cmd
 
 import (
@@ -28,7 +30,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of gansible",
 	Long:  `All software has versions. This is gansible's`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("gansible version is v0.1.0")
+		fmt.Println("gansible version is v0.1.1")
 	},
 }
 
