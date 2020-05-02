@@ -557,7 +557,7 @@ func DownloadFile(sftpClient *sftp.Client, srcFilePath string, destDir string) E
 	}
 	defer srcFile.Close()
 	var destFileName = path.Base(srcFilePath)
-	destFile, err := sftpClient.Create(path.Join(destDir, destFileName))
+	destFile, err := os.Create(path.Join(destDir, destFileName))
 	if err != nil {
 		execr.Status = StatusFailed
 		execr.RetrunCode = "1"
