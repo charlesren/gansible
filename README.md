@@ -2,7 +2,7 @@
 
 ## 介绍
 
-Gansible is a lightweight cli tool designed for system administrator.  
+Gansible is a lightweight cli tool used to execute commands on multiple devices in parallel.  
 可并发在一组服务器上执行命令、上传下载文件或目录、执行本地脚本。
 
 ### 主要特性
