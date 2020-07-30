@@ -24,8 +24,8 @@ Gansible is a lightweight cli tool used to execute commands on multiple devices 
 
    eg: gansible run -n 127.0.0.1 -c "echo GAN.NODE"
     返回  #127.0.0.1
-
-       gansible script -n 127.0.0.1 -a "serve GAN.NODE"   /tmp/program.sh
+    
+    gansible script -n 127.0.0.1 -a "serve GAN.NODE"   /tmp/program.sh
 
 ### **计划中**
 1. 多颜色展示输出。
