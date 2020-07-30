@@ -21,8 +21,10 @@ Gansible is a lightweight cli tool used to execute commands on multiple devices 
 9. 指定每台设备上任务超时时间。  
    通过--timeout参数指定（默认300s)。
 10. 通过引用GAN.NODE关键字，支持在命令行或脚本参数中引用当前所在的设备的IP。
+
    eg: gansible run -n 127.0.0.1 -c "echo GAN.NODE"
     返回  #127.0.0.1
+
        gansible script -n 127.0.0.1 -a "serve GAN.NODE"   /tmp/program.sh
 
 ### **计划中**
