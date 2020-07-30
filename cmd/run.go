@@ -23,6 +23,7 @@ import (
 	"gansible/pkg/connect"
 	"gansible/pkg/utils"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -63,7 +64,7 @@ Default timeout of each task is 300 seconds.`,
 				noder := utils.NodeResult{}
 				noder.Node = reflect.ValueOf(node).String()
 				var client *ssh.Client
-				client, err = connect.DoSilent(keyPath, keyPassword, user, password, reflect.ValueOf(node).String(), port, sshTimeout, pwdFile)
+				client, err = connect.DoSilent(keyPath, keyPassword, user, password, noder.Node, port, sshTimeout, pwdFile)
 				if err != nil {
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"
@@ -74,7 +75,8 @@ Default timeout of each task is 300 seconds.`,
 					fmt.Printf("\n")
 				} else {
 					defer client.Close()
-					noder.Result = utils.Execute(client, commands, timeout)
+					nodecmd := strings.Replace(commands, "GAN.NODE", noder.Node, -1)
+					noder.Result = utils.Execute(client, nodecmd, timeout)
 					result <- noder
 					utils.PrintNodeResult(noder, outputStyle)
 				}
