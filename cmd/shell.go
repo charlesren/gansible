@@ -40,7 +40,7 @@ var shellCmd = &cobra.Command{
 		fmt.Println("Node:", node)
 		client, err := connect.Do(keyPath, keyPassword, user, password, node, port, sshTimeout, pwdFile)
 		if err != nil {
-			fmt.Println("login failed")
+			log.Fatal(err)
 		} else {
 			defer client.Close()
 			session, err := client.NewSession()
