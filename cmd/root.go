@@ -75,7 +75,7 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.gansible.yaml)")
-	rootCmd.PersistentFlags().IntVar(&forks, "forks", 5, "number of concurrenrt tasks")
+	rootCmd.PersistentFlags().IntVar(&forks, "forks", 10, "number of concurrenrt tasks")
 	rootCmd.PersistentFlags().BoolVarP(&loging, "loging", "", false, "save result log")
 	rootCmd.PersistentFlags().StringVar(&logFileFormat, "log-file-format", "csv", "log file format: log/json/yaml/csv")
 	rootCmd.PersistentFlags().StringVar(&logDir, "log-dir", "", "dir to save log file")
@@ -87,7 +87,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "password of remote server")
 	//rootCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
 	rootCmd.Flags().IntVar(&port, "port", 22, "port used to login remote server")
-	rootCmd.PersistentFlags().IntVar(&sshTimeout, "ssh-timeout", 30, "login should be successful before timeout")
+	rootCmd.PersistentFlags().IntVar(&sshTimeout, "ssh-timeout", 90, "login should be successful before timeout")
 	rootCmd.PersistentFlags().StringVar(&pwdFile, "pwdfile", "", "password file (default is $HOME/.pwdfile)")
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

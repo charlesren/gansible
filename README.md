@@ -6,8 +6,8 @@ Gansible is a lightweight cli tool used to execute commands on multiple devices 
 可并发在一组服务器上执行命令、上传下载文件或目录、执行本地脚本。
 
 ### 主要特性
-1. 并发在多个设备上执行任务。默认5个并发，可通过--forks参数设定并发数量，最大10000。
-2. 可设置ssh连接超时时间。默认30秒，可通过--ssh-timeout参数设定。
+1. 并发在多个设备上执行任务。默认10个并发，可通过--forks参数设定并发数量，最大10000。
+2. 可设置ssh连接超时时间。默认90秒，可通过--ssh-timeout参数设定。
 3. 以gansible、json、yaml格式输出任务结果,默认gansible。
 4. 以log、csv、json、yaml格式保存任务日志记录。  
    通过--loging指定保存日志（默认不保存）。    
