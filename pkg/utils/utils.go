@@ -21,6 +21,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -29,6 +30,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/pkg/sftp"
@@ -398,6 +400,50 @@ func ParseIP(ipFile, ipStr string) ([]string, error) {
 	return ip, nil
 }
 
+//MuxShell
+func MuxShell(w io.Writer, r, e io.Reader) (chan<- string, <-chan string) {
+	in := make(chan string, 5)
+	out := make(chan string, 5)
+	var wg sync.WaitGroup
+	wg.Add(1) //for the shell itself
+	go func() {
+		for cmd := range in {
+			wg.Add(1)
+			w.Write([]byte(cmd + "\n"))
+			wg.Wait()
+		}
+	}()
+
+	go func() {
+		var (
+			buf [1024 * 1024]byte
+			t   int
+		)
+		for {
+			n, err := r.Read(buf[t:])
+			if err != nil {
+				fmt.Println(err.Error())
+				close(in)
+				close(out)
+				return
+			}
+			t += n
+			result := string(buf[:t])
+			if strings.Contains(string(buf[t-n:t]), "More") {
+				w.Write([]byte("\n"))
+			}
+			if strings.Contains(result, "username:") ||
+				strings.Contains(result, "password:") ||
+				strings.Contains(result, ">") {
+				out <- string(buf[:t])
+				t = 0
+				wg.Done()
+			}
+		}
+	}()
+	return in, out
+}
+
 //Execute run given commands  on  ssh clinet then return ExecResult
 func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	timer := time.NewTimer(time.Duration(timeout) * time.Second)
@@ -410,20 +456,75 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 		execr.Out = err.Error()
 	} else {
 		defer session.Close()
-		//Exec cmd then quit
-		commands = strings.TrimRight(commands, ";")
-		command := strings.Split(commands, ";")
-		cmdNew := strings.Join(command, "&&")
-		out, err := session.CombinedOutput(cmdNew)
+		modes := ssh.TerminalModes{
+			ssh.ECHO:          1,     // enable echoing
+			ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
+			ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
+		}
+		if err := session.RequestPty("xterm", 40, 80, modes); err != nil {
+			log.Fatal("request for pseudo terminal failed: ", err)
+		}
+		stdi, err := session.StdinPipe()
 		if err != nil {
+			panic(err)
+		}
+		stdo, err := session.StdoutPipe()
+		if err != nil {
+			panic(err)
+		}
+		stde, err := session.StderrPipe()
+		if err != nil {
+			panic(err)
+		}
+		i, o := MuxShell(stdi, stdo, stde)
+		out := <-o
+		if err := session.Shell(); err != nil {
+			log.Fatal("failed to start shell: ", err)
 			execr.Status = StatusFailed
 			execr.RetrunCode = "1"
 			execr.Out = string(out)
 		} else {
+			<-o //ignore the shell output
+			/*
+							go func(i io.Writer, o *bytes.Buffer) {
+				        for {
+				            if strings.Contains(string(output.Bytes()), "[sudo] password for ") {
+				                _, err = in.Write([]byte(conn.password + "\n"))
+				                if err != nil {
+				                    break
+				                }
+				                fmt.Println("put the password ---  end .")
+				                break
+				            }
+				        }
+				    }(stdi, stdo)
+			*/
+			//prepare cmd
+			commands = strings.TrimRight(commands, ";")
+			cmdlist := strings.Split(commands, ";")
+			//cmdNew := strings.Join(command, "&&")
+			for _, cmd := range cmdlist {
+				cmd = cmd + "\n"
+				i <- cmd
+			}
+			i <- "exit"
+			session.Wait()
 			execr.Status = StatusSuccess
 			execr.RetrunCode = "0"
 			execr.Out = string(out)
 		}
+		/*
+			out, err := session.CombinedOutput(cmdNew)
+			if err != nil {
+				execr.Status = StatusFailed
+				execr.RetrunCode = "1"
+				execr.Out = string(out)
+			} else {
+				execr.Status = StatusSuccess
+				execr.RetrunCode = "0"
+				execr.Out = string(out)
+			}
+		*/
 	}
 	//send ExecResult
 	ch := make(chan bool, 1)
