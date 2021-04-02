@@ -401,7 +401,7 @@ func ParseIP(ipFile, ipStr string) ([]string, error) {
 }
 
 //MuxShell
-func MuxShell(w io.Writer, r, e io.Reader) (chan<- string, <-chan string) {
+func MuxShell(stdin io.Writer, stdout, stderr io.Reader) (chan<- string, <-chan string) {
 	in := make(chan string, 5)
 	out := make(chan string, 5)
 	var wg sync.WaitGroup
@@ -409,7 +409,7 @@ func MuxShell(w io.Writer, r, e io.Reader) (chan<- string, <-chan string) {
 	go func() {
 		for cmd := range in {
 			wg.Add(1)
-			w.Write([]byte(cmd + "\n"))
+			stdin.Write([]byte(cmd + "\n"))
 			wg.Wait()
 		}
 	}()
@@ -420,7 +420,7 @@ func MuxShell(w io.Writer, r, e io.Reader) (chan<- string, <-chan string) {
 			t   int
 		)
 		for {
-			n, err := r.Read(buf[t:])
+			n, err := stdout.Read(buf[t:])
 			if err != nil {
 				fmt.Println(err.Error())
 				close(in)
@@ -430,7 +430,7 @@ func MuxShell(w io.Writer, r, e io.Reader) (chan<- string, <-chan string) {
 			t += n
 			result := string(buf[:t])
 			if strings.Contains(string(buf[t-n:t]), "More") {
-				w.Write([]byte("\n"))
+				stdin.Write([]byte("\n"))
 			}
 			if strings.Contains(result, "username:") ||
 				strings.Contains(result, "password:") ||
@@ -464,67 +464,65 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 		if err := session.RequestPty("xterm", 40, 80, modes); err != nil {
 			log.Fatal("request for pseudo terminal failed: ", err)
 		}
-		stdi, err := session.StdinPipe()
+		//var outbt, errbt bytes.Buffer
+		//session.Stdout = &outbt
+		//session.Stderr = &errbt
+		inpip, err := session.StdinPipe()
 		if err != nil {
 			panic(err)
 		}
-		stdo, err := session.StdoutPipe()
+		outbt, err := session.StdoutPipe()
 		if err != nil {
 			panic(err)
 		}
-		stde, err := session.StderrPipe()
+		errbt, err := session.StderrPipe()
 		if err != nil {
 			panic(err)
 		}
-		i, o := MuxShell(stdi, stdo, stde)
-		out := <-o
+		//i, o := MuxShell(stdi, stdo, stde)
+		i, o := MuxShell(inpip, outbt, errbt)
+		var out string
+		//out := <-o
 		if err := session.Shell(); err != nil {
 			log.Fatal("failed to start shell: ", err)
 			execr.Status = StatusFailed
 			execr.RetrunCode = "1"
+			//execr.Out = outbt.String() + errbt.String()
 			execr.Out = string(out)
 		} else {
-			<-o //ignore the shell output
 			/*
-							go func(i io.Writer, o *bytes.Buffer) {
-				        for {
-				            if strings.Contains(string(output.Bytes()), "[sudo] password for ") {
-				                _, err = in.Write([]byte(conn.password + "\n"))
-				                if err != nil {
-				                    break
-				                }
-				                fmt.Println("put the password ---  end .")
-				                break
-				            }
-				        }
-				    }(stdi, stdo)
+				go func(i io.Writer, o *bytes.Buffer) {
+					for {
+						if strings.Contains(string(output.Bytes()), "[sudo] password for ") {
+							_, err = in.Write([]byte(conn.password + "\n"))
+							if err != nil {
+								break
+							}
+							fmt.Println("put the password ---  end .")
+							break
+						}
+					}
+				}(stdi, stdo)
 			*/
 			//prepare cmd
 			commands = strings.TrimRight(commands, ";")
 			cmdlist := strings.Split(commands, ";")
-			//cmdNew := strings.Join(command, "&&")
 			for _, cmd := range cmdlist {
 				cmd = cmd + "\n"
 				i <- cmd
+				//inpip.Write([]byte(cmd))
+				//fmt.Printf("cmd: %v\n", cmd)
 			}
+			//inpip.Write([]byte("exit\n"))
+			<-o //ignore the shell output
 			i <- "exit"
 			session.Wait()
 			execr.Status = StatusSuccess
 			execr.RetrunCode = "0"
-			execr.Out = string(out)
+			//execr.Out = outbt.String() + errbt.String()
+			execr.Out = <-o
+			//execr.Out = string(out)
 		}
-		/*
-			out, err := session.CombinedOutput(cmdNew)
-			if err != nil {
-				execr.Status = StatusFailed
-				execr.RetrunCode = "1"
-				execr.Out = string(out)
-			} else {
-				execr.Status = StatusSuccess
-				execr.RetrunCode = "0"
-				execr.Out = string(out)
-			}
-		*/
 	}
 	//send ExecResult
 	ch := make(chan bool, 1)
