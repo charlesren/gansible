@@ -18,6 +18,7 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -457,7 +458,7 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	} else {
 		defer session.Close()
 		modes := ssh.TerminalModes{
-			ssh.ECHO:          1,     // enable echoing
+			ssh.ECHO:          0,     // enable echoing
 			ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
 			ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 		}
@@ -467,28 +468,39 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 		//var outbt, errbt bytes.Buffer
 		//session.Stdout = &outbt
 		//session.Stderr = &errbt
-		inpip, err := session.StdinPipe()
+		//var out string
+		var outbuf bytes.Buffer
+		var wg sync.WaitGroup
+		wg.Add(3)
+		stdin, err := session.StdinPipe()
 		if err != nil {
 			panic(err)
 		}
-		outbt, err := session.StdoutPipe()
+		stdout, err := session.StdoutPipe()
 		if err != nil {
 			panic(err)
 		}
-		errbt, err := session.StderrPipe()
+		go func() {
+			defer wg.Done()
+			io.Copy(&outbuf, stdout)
+		}()
+		stderr, err := session.StderrPipe()
 		if err != nil {
 			panic(err)
 		}
+		go func() {
+			defer wg.Done()
+			go io.Copy(&outbuf, stderr)
+		}()
 		//i, o := MuxShell(stdi, stdo, stde)
-		i, o := MuxShell(inpip, outbt, errbt)
-		var out string
+		//i, o := MuxShell(stdin, stdout, stderr)
 		//out := <-o
 		if err := session.Shell(); err != nil {
 			log.Fatal("failed to start shell: ", err)
 			execr.Status = StatusFailed
 			execr.RetrunCode = "1"
 			//execr.Out = outbt.String() + errbt.String()
-			execr.Out = string(out)
+			execr.Out = outbuf.String()
 		} else {
 			/*
 				go func(i io.Writer, o *bytes.Buffer) {
@@ -505,23 +517,30 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 				}(stdi, stdo)
 			*/
 			//prepare cmd
+			//fmt.Println("hello")
+			//fmt.Println(outbuf.String())
 			commands = strings.TrimRight(commands, ";")
 			cmdlist := strings.Split(commands, ";")
 			for _, cmd := range cmdlist {
 				cmd = cmd + "\n"
-				i <- cmd
-				//inpip.Write([]byte(cmd))
+				//i <- cmd
+				//io.WriteString(&outbuf,cmd)
+				stdin.Write([]byte(cmd))
 				//fmt.Printf("cmd: %v\n", cmd)
 			}
 			//inpip.Write([]byte("exit\n"))
-			<-o //ignore the shell output
-			i <- "exit"
+			//<-o //ignore the shell output
+			//i <- "exit"
+			stdin.Write([]byte("exit\n"))
 			session.Wait()
+			//fmt.Println("hello1")
 			execr.Status = StatusSuccess
 			execr.RetrunCode = "0"
 			//execr.Out = outbt.String() + errbt.String()
-			execr.Out = <-o
+			//execr.Out = <-o
 			//execr.Out = string(out)
+			execr.Out = outbuf.String()
+			//fmt.Println(execr.Out)
 		}
 	}
 	//send ExecResult
