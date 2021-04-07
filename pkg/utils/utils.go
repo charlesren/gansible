@@ -458,20 +458,19 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 	} else {
 		defer session.Close()
 		modes := ssh.TerminalModes{
-			ssh.ECHO:          0,     // enable echoing
+			ssh.ECHO:          1,     // enable echoing
 			ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
 			ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 		}
 		if err := session.RequestPty("xterm", 40, 80, modes); err != nil {
 			log.Fatal("request for pseudo terminal failed: ", err)
 		}
-		//var outbt, errbt bytes.Buffer
-		//session.Stdout = &outbt
-		//session.Stderr = &errbt
-		//var out string
+		//var stdout, stderr bytes.Buffer
+		//session.Stdout = &stdout
+		//session.Stderr = &stderr
 		var outbuf bytes.Buffer
-		var wg sync.WaitGroup
-		wg.Add(3)
+		//session.Stdout = &outbuf
+		//session.Stderr = &outbuf
 		stdin, err := session.StdinPipe()
 		if err != nil {
 			panic(err)
@@ -481,25 +480,23 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 			panic(err)
 		}
 		go func() {
-			defer wg.Done()
-			io.Copy(&outbuf, stdout)
+			if _, err := io.Copy(&outbuf, stdout); err != nil {
+				log.Fatal(err)
+			}
 		}()
 		stderr, err := session.StderrPipe()
 		if err != nil {
 			panic(err)
 		}
 		go func() {
-			defer wg.Done()
-			go io.Copy(&outbuf, stderr)
+			if _, err := io.Copy(&outbuf, stderr); err != nil {
+				log.Fatal(err)
+			}
 		}()
-		//i, o := MuxShell(stdi, stdo, stde)
-		//i, o := MuxShell(stdin, stdout, stderr)
-		//out := <-o
 		if err := session.Shell(); err != nil {
 			log.Fatal("failed to start shell: ", err)
 			execr.Status = StatusFailed
 			execr.RetrunCode = "1"
-			//execr.Out = outbt.String() + errbt.String()
 			execr.Out = outbuf.String()
 		} else {
 			/*
@@ -517,30 +514,29 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 				}(stdi, stdo)
 			*/
 			//prepare cmd
-			//fmt.Println("hello")
-			//fmt.Println(outbuf.String())
 			commands = strings.TrimRight(commands, ";")
 			cmdlist := strings.Split(commands, ";")
 			for _, cmd := range cmdlist {
 				cmd = cmd + "\n"
 				//i <- cmd
-				//io.WriteString(&outbuf,cmd)
 				stdin.Write([]byte(cmd))
-				//fmt.Printf("cmd: %v\n", cmd)
 			}
-			//inpip.Write([]byte("exit\n"))
-			//<-o //ignore the shell output
-			//i <- "exit"
-			stdin.Write([]byte("exit\n"))
-			session.Wait()
-			//fmt.Println("hello1")
+			//stdin.Write([]byte("exit\n"))
+			/*
+			if err = session.Wait(); err != nil {
+				if _, ok := err.(*ssh.ExitError); ok {
+					//return err.ExitStatus(), nil
+					fmt.Println("1")
+				} else {
+					//return -1, errors.New("failed to wait ssh command: " + err.Error())
+					fmt.Println("2")
+				}
+			}
+			*/
+			time.Sleep(1 * time.Second)
 			execr.Status = StatusSuccess
 			execr.RetrunCode = "0"
-			//execr.Out = outbt.String() + errbt.String()
-			//execr.Out = <-o
-			//execr.Out = string(out)
 			execr.Out = outbuf.String()
-			//fmt.Println(execr.Out)
 		}
 	}
 	//send ExecResult
