@@ -42,6 +42,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 		config       ssh.Config
 		err          error
 	)
+	config.Ciphers = []string{"aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-gcm@openssh.com","arcfour256", "arcfour128", "aes128-cbc", "aes192-cbc", "aes256-cbc", "3des-cbc", "des-cbc"}
 	if user == "" {
 		currentUser, err := osuser.Current()
 		if err != nil {
