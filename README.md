@@ -72,7 +72,7 @@ GOOS=darwin go build
          把ssh-key 拷到本目录;Dockerfile 添加如下内容 COPY id_rsa   /root/.ssh/id_rsa  
          把.pwdfile拷到本目录;Dockerfile 添加如下内容 COPY .pwdfile    /root/.pwdfile
 5. docker build -t gansible .
-6. docker run --name gansible -it -v /root:/root -v /tmp:tmp gansible
+6. docker run --name gansible -it -v /root:/root -v /tmp:/tmp gansible
 - 二进制方式安装
 
 *Linux 系统*
