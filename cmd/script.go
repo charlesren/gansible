@@ -64,7 +64,7 @@ var scriptCmd = &cobra.Command{
 				noder := utils.NodeResult{}
 				noder.Node = reflect.ValueOf(node).String()
 				var client *ssh.Client
-				client, err = connect.DoSilent(keyPath, keyPassword, user, password, noder.Node, port, sshTimeout, pwdFile)
+				client, err = connect.DoSilent(keyPath, keyPassword, user, password, noder.Node, port, sshTimeout, sshThreads, pwdFile)
 				if err != nil {
 					noder.Result.Status = "Unreachable"
 					noder.Result.RetrunCode = "1"

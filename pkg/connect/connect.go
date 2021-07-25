@@ -33,7 +33,7 @@ import (
 )
 
 //Do func is used to connect to server
-func Do(keyPath string, keyPassword string, user string, password string, node string, port int, sshTimeout int, pwdFile string) (*ssh.Client, error) {
+func Do(keyPath string, keyPassword string, user string, password string, node string, port int, sshTimeout int, sshThreads int, pwdFile string) (*ssh.Client, error) {
 	var (
 		authMethod   []ssh.AuthMethod
 		addr         string
@@ -42,7 +42,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 		config       ssh.Config
 		err          error
 	)
-	config.Ciphers = []string{"aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-gcm@openssh.com","arcfour256", "arcfour128", "aes128-cbc", "aes192-cbc", "aes256-cbc", "3des-cbc", "des-cbc"}
+	config.Ciphers = []string{"aes128-ctr", "aes192-ctr", "aes256-ctr", "aes128-gcm@openssh.com", "arcfour256", "arcfour128", "aes128-cbc", "aes192-cbc", "aes256-cbc", "3des-cbc", "des-cbc"}
 	if user == "" {
 		currentUser, err := osuser.Current()
 		if err != nil {
@@ -127,7 +127,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 		if err != nil {
 			return nil, err
 		}
-		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
+		client, err := TryPasswords(user, passwords, node, port, sshTimeout, sshThreads)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +140,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 		if err != nil {
 			return nil, err
 		}
-		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
+		client, err := TryPasswords(user, passwords, node, port, sshTimeout, sshThreads)
 		if err != nil {
 			return nil, err
 		}
@@ -155,7 +155,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 		if err != nil {
 			return nil, err
 		}
-		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
+		client, err := TryPasswords(user, passwords, node, port, sshTimeout, sshThreads)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +166,7 @@ func Do(keyPath string, keyPassword string, user string, password string, node s
 }
 
 //DoSilent func is used to connect to server but has no message return . typically useed for connect to server currently.
-func DoSilent(keyPath string, keyPassword string, user string, password string, node string, port int, sshTimeout int, pwdFile string) (*ssh.Client, error) {
+func DoSilent(keyPath string, keyPassword string, user string, password string, node string, port int, sshTimeout int, sshThreads int, pwdFile string) (*ssh.Client, error) {
 	var (
 		authMethod   []ssh.AuthMethod
 		addr         string
@@ -256,7 +256,7 @@ func DoSilent(keyPath string, keyPassword string, user string, password string, 
 		if err != nil {
 			return nil, err
 		}
-		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
+		client, err := TryPasswords(user, passwords, node, port, sshTimeout, sshThreads)
 		if err != nil {
 			return nil, err
 		}
@@ -268,7 +268,7 @@ func DoSilent(keyPath string, keyPassword string, user string, password string, 
 		if err != nil {
 			return nil, err
 		}
-		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
+		client, err := TryPasswords(user, passwords, node, port, sshTimeout, sshThreads)
 		if err != nil {
 			return nil, err
 		}
@@ -283,7 +283,7 @@ func DoSilent(keyPath string, keyPassword string, user string, password string, 
 		if err != nil {
 			return nil, err
 		}
-		client, err := TryPasswords(user, passwords, node, port, sshTimeout)
+		client, err := TryPasswords(user, passwords, node, port, sshTimeout, sshThreads)
 		if err != nil {
 			return nil, err
 		}
@@ -376,7 +376,8 @@ func GetPassword(pwdFile string) ([]string, error) {
 }
 
 //TryPasswords ssh to a machine using a set of possible passwords concurrently.
-func TryPasswords(user string, passwords []string, node string, port int, sshTimeout int) (*ssh.Client, error) {
+func TryPasswords(user string, passwords []string, node string, port int, sshTimeout int, sshThreads int) (*ssh.Client, error) {
+	passwordChan := make(chan string, sshThreads*2)
 	if passwords == nil {
 		return nil, fmt.Errorf("TryPasswords failed : passwords is nil")
 	}
@@ -388,22 +389,47 @@ func TryPasswords(user string, passwords []string, node string, port int, sshTim
 	finish := make(chan bool)
 	errTimeout := fmt.Errorf("Time out in %d seconds", sshTimeout)
 	errAllPassWrong := fmt.Errorf("All passwords are wrong")
-	for _, password := range passwords {
-		go func(password string) {
-			c, err := WithPass(user, password, node, port, sshTimeout)
-			if err == nil {
-				ch <- c
-			} else {
-				mutex.Lock()
-				count = count + 1
-				if count == len(passwords) {
-					fmt.Println(err)
-					finish <- true
+	go func() {
+		for _, password := range passwords {
+			passwordChan <- password
+		}
+	}()
+	for i := 0; i < sshThreads; i++ {
+		go func() {
+			for password := range passwordChan {
+				c, err := WithPass(user, password, node, port, sshTimeout)
+				if err == nil {
+					ch <- c
+				} else {
+					mutex.Lock()
+					count = count + 1
+					if count == len(passwords) {
+						fmt.Println(err)
+						finish <- true
+					}
+					mutex.Unlock()
 				}
-				mutex.Unlock()
 			}
-		}(password)
+		}()
 	}
+	/*
+		for _, password := range passwords {
+			go func(password string) {
+				c, err := WithPass(user, password, node, port, sshTimeout)
+				if err == nil {
+					ch <- c
+				} else {
+					mutex.Lock()
+					count = count + 1
+					if count == len(passwords) {
+						fmt.Println(err)
+						finish <- true
+					}
+					mutex.Unlock()
+				}
+			}(password)
+		}
+	*/
 	select {
 	case client := <-ch:
 		return client, nil

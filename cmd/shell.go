@@ -38,7 +38,7 @@ var shellCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		node := args[0]
 		fmt.Println("Node:", node)
-		client, err := connect.Do(keyPath, keyPassword, user, password, node, port, sshTimeout, pwdFile)
+		client, err := connect.Do(keyPath, keyPassword, user, password, node, port, sshTimeout, sshThreads, pwdFile)
 		if err != nil {
 			log.Fatal(err)
 		} else {
