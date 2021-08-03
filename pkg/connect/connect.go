@@ -18,6 +18,7 @@ package connect
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -377,6 +378,7 @@ func GetPassword(pwdFile string) ([]string, error) {
 
 //TryPasswords ssh to a machine using a set of possible passwords concurrently.
 func TryPasswords(user string, passwords []string, node string, port int, sshTimeout int, sshThreads int) (*ssh.Client, error) {
+	ctx, cancel := context.WithCancel(context.Background())
 	passwordChan := make(chan string, sshThreads*2)
 	if passwords == nil {
 		return nil, fmt.Errorf("TryPasswords failed : passwords is nil")
@@ -395,43 +397,31 @@ func TryPasswords(user string, passwords []string, node string, port int, sshTim
 		}
 	}()
 	for i := 0; i < sshThreads; i++ {
-		go func() {
+		go func(ctx context.Context) {
 			for password := range passwordChan {
-				c, err := WithPass(user, password, node, port, sshTimeout)
-				if err == nil {
-					ch <- c
-				} else {
-					mutex.Lock()
-					count = count + 1
-					if count == len(passwords) {
-						fmt.Println(err)
-						finish <- true
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					c, err := WithPass(user, password, node, port, sshTimeout)
+					if err == nil {
+						ch <- c
+					} else {
+						mutex.Lock()
+						count = count + 1
+						if count == len(passwords) {
+							fmt.Println(err)
+							finish <- true
+						}
+						mutex.Unlock()
 					}
-					mutex.Unlock()
 				}
 			}
-		}()
+		}(ctx)
 	}
-	/*
-		for _, password := range passwords {
-			go func(password string) {
-				c, err := WithPass(user, password, node, port, sshTimeout)
-				if err == nil {
-					ch <- c
-				} else {
-					mutex.Lock()
-					count = count + 1
-					if count == len(passwords) {
-						fmt.Println(err)
-						finish <- true
-					}
-					mutex.Unlock()
-				}
-			}(password)
-		}
-	*/
 	select {
 	case client := <-ch:
+		cancel()
 		return client, nil
 	case <-finish:
 		return nil, errAllPassWrong
