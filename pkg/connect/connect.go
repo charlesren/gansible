@@ -424,8 +424,10 @@ func TryPasswords(user string, passwords []string, node string, port int, sshTim
 		cancel()
 		return client, nil
 	case <-finish:
+		cancel()
 		return nil, errAllPassWrong
 	case <-timer.C:
+		cancel()
 		return nil, errTimeout
 	}
 }
