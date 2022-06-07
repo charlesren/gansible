@@ -42,7 +42,7 @@ var runCmd = &cobra.Command{
 	Short: "Run commands on multiple nodes in parallel",
 	Long: `Run commands on multiple nodes in parallel,return result when finished.Default number of concurrenrt tasks is 5.
 Default timeout of each task is 300 seconds.`,
-	Args: cobra.MaximumNArgs(1),
+	Args: cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()

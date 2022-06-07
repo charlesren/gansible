@@ -39,6 +39,7 @@ var pushCmd = &cobra.Command{
 	Use:   "push",
 	Short: "Upload file to remote nodes",
 	Long:  `Upload file to remote nodes.`,
+	Args:  cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
