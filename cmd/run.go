@@ -51,7 +51,7 @@ The most typical example:  gansible	run -c "cd /tmp &&  pwd;ls"  -n  "10.0.0.1;1
 		if err != nil {
 			fmt.Println(err)
 		}
-		if ip == nil {
+		if len(ip) == 0 {
 			fmt.Println("No node specified!")
 		} else {
 			if forks < 1 {

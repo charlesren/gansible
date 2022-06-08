@@ -51,7 +51,7 @@ The most typical example:  gansible script -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.
 		if err != nil {
 			fmt.Println(err)
 		}
-		if ip == nil {
+		if len(ip) == 0 {
 			fmt.Println("No node specified!")
 		} else {
 			if forks < 1 {
