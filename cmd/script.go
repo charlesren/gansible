@@ -41,7 +41,7 @@ var scriptCmd = &cobra.Command{
 	Use:   "script",
 	Short: "Run local script on remote nodes",
 	Long: `Run local script on remote nodes.
-The most typical example:  gansible script -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.9"  /script/dir/script.sh  -a "scriptArg1  scriptArg2"`,
+The most typical example:  gansible script -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.9"  /path/to/local/script/dir/script.sh  -a "scriptArg1  scriptArg2"`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		scriptFile := args[0]
