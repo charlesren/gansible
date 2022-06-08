@@ -40,8 +40,9 @@ var scriptArgs string
 var scriptCmd = &cobra.Command{
 	Use:   "script",
 	Short: "Run local script on remote nodes",
-	Long:  `Run local script on remote nodes.`,
-	Args:  cobra.ExactArgs(1),
+	Long: `Run local script on remote nodes.
+The most typical example:  gansible script -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.9"  /script/dir/script.sh  -a "scriptArg1  scriptArg2"`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		scriptFile := args[0]
 		var sumr utils.ResultSum
@@ -136,6 +137,6 @@ func init() {
 	// scriptCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	scriptCmd.Flags().StringVarP(&dir, "dir", "d", "", "run script at designated dir")
 	scriptCmd.Flags().StringVarP(&scriptArgs, "args", "a", "", "args for script")
-	scriptCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	scriptCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.8")
 	scriptCmd.Flags().StringVarP(&nodeFile, "nodefile", "f", "", "eg: /path/to/nodefile.txt  or ./nodefile.txt")
 }

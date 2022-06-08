@@ -86,7 +86,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&keyPassword, "keyPassword", "", "password of ssh private key")
 	rootCmd.PersistentFlags().StringVarP(&user, "user", "u", "", "user used to login remote server")
 	rootCmd.PersistentFlags().StringVarP(&password, "password", "p", "", "password of remote server")
-	//rootCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	//rootCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.8")
 	rootCmd.Flags().IntVar(&port, "port", 22, "port used to login remote server")
 	rootCmd.PersistentFlags().IntVar(&sshTimeout, "ssh-timeout", 90, "login should be successful before timeout")
 	rootCmd.PersistentFlags().IntVar(&sshThreads, "ssh-threads", 8, "threads used for login to each node when try passwords")

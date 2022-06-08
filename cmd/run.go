@@ -41,7 +41,8 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run commands on multiple nodes in parallel",
 	Long: `Run commands on multiple nodes in parallel,return result when finished.Default number of concurrenrt tasks is 5.
-Default timeout of each task is 300 seconds.`,
+Default timeout of each task is 300 seconds.
+The most typical example:  gansible	run -c "cd /tmp &&  pwd;ls"  -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.9" `,
 	Args: cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
@@ -116,7 +117,7 @@ func init() {
 	// is called directly, e.g.:
 	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	runCmd.Flags().StringVarP(&commands, "commands", "c", "", "separate multiple command with semicolons(eg: pwd;ls)")
-	runCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	runCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.8")
 	runCmd.Flags().StringVarP(&nodeFile, "nodefile", "f", "", "eg: /path/to/nodefile.txt  or ./nodefile.txt")
 	runCmd.Flags().IntVarP(&timeout, "timeout", "", 300, "task should finished before timeout")
 	runCmd.MarkFlagRequired("commands")

@@ -36,8 +36,10 @@ import (
 var fetchCmd = &cobra.Command{
 	Use:   "fetch",
 	Short: "Download file from remote nodes",
-	Long:  `Download file from remote nodes.`,
-	Args:  cobra.MaximumNArgs(0),
+	Long: `Download file from remote nodes.
+Fetch will create folder named by ip for each host.
+The most typical example:  gansible	fetch  -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.9"  -s /remote/file/or/dir -d /local/dir`,
+	Args: cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
@@ -121,6 +123,6 @@ func init() {
 	fetchCmd.MarkFlagRequired("src")
 	fetchCmd.Flags().StringVarP(&dest, "dest", "d", "", "Destination file or directory")
 	fetchCmd.MarkFlagRequired("dest")
-	fetchCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	fetchCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.8")
 	fetchCmd.Flags().StringVarP(&nodeFile, "nodefile", "f", "", "eg: /path/to/nodefile.txt  or ./nodefile.txt")
 }

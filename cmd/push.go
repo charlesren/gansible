@@ -38,8 +38,9 @@ var dest string
 var pushCmd = &cobra.Command{
 	Use:   "push",
 	Short: "Upload file to remote nodes",
-	Long:  `Upload file to remote nodes.`,
-	Args:  cobra.MaximumNArgs(0),
+	Long: `Upload file to remote nodes.
+The most typical example:  gansible	push  -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.9"  -s /local/file/or/dir -d /remote/dir`,
+	Args: cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		var sumr utils.ResultSum
 		sumr.StartTime = time.Now()
@@ -123,6 +124,6 @@ func init() {
 	pushCmd.MarkFlagRequired("src")
 	pushCmd.Flags().StringVarP(&dest, "dest", "d", "", "Destination file or directory")
 	pushCmd.MarkFlagRequired("dest")
-	pushCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.2-5;10.0.0.6-10.0.0.8")
+	pushCmd.Flags().StringVarP(&nodes, "nodes", "n", "", "eg: 10.0.0.1;10.0.0.3-5;10.0.0.7-10.0.0.8")
 	pushCmd.Flags().StringVarP(&nodeFile, "nodefile", "f", "", "eg: /path/to/nodefile.txt  or ./nodefile.txt")
 }
