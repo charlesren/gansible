@@ -521,8 +521,7 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 				//i <- cmd
 				stdin.Write([]byte(cmd))
 			}
-			//stdin.Write([]byte("exit\n"))
-			/*
+			stdin.Write([]byte("exit\n"))
 			if err = session.Wait(); err != nil {
 				if _, ok := err.(*ssh.ExitError); ok {
 					//return err.ExitStatus(), nil
@@ -532,7 +531,6 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 					fmt.Println("2")
 				}
 			}
-			*/
 			time.Sleep(1 * time.Second)
 			execr.Status = StatusSuccess
 			execr.RetrunCode = "0"
