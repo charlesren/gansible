@@ -616,7 +616,7 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 			pureOut := trimOut(&outbuf)
 			execr.Status = StatusSuccess
 			execr.RetrunCode = "0"
-			execr.Out = pureOut + errbuf.String()
+			execr.Out = fmt.Sprintf("%s%s\n", pureOut, errbuf.String())
 		}
 	}
 	//send ExecResult
