@@ -31,7 +31,7 @@ var versionCmd = &cobra.Command{
 	Long:  `All software has versions. This is gansible's`,
 	Args:  cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("gansible version is v0.5.0")
+		fmt.Println("gansible version is v0.5.1")
 	},
 }
 

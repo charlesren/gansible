@@ -562,60 +562,26 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 		if err := session.RequestPty("xterm", 40, 80, modes); err != nil {
 			log.Fatal("request for pseudo terminal failed: ", err)
 		}
-		//var stdout, stderr bytes.Buffer
-		//session.Stdout = &stdout
-		//session.Stderr = &stderr
 		var outbuf bytes.Buffer
-		//session.Stdout = &outbuf
-		//session.Stderr = &outbuf
+		session.Stdout = &outbuf
+		var errbuf bytes.Buffer
+		session.Stderr = &errbuf
 		stdin, err := session.StdinPipe()
 		if err != nil {
 			panic(err)
 		}
-		stdout, err := session.StdoutPipe()
-		if err != nil {
-			panic(err)
-		}
-		go func() {
-			if _, err := io.Copy(&outbuf, stdout); err != nil {
-				log.Fatal(err)
-			}
-		}()
-		stderr, err := session.StderrPipe()
-		if err != nil {
-			panic(err)
-		}
-		go func() {
-			if _, err := io.Copy(&outbuf, stderr); err != nil {
-				log.Fatal(err)
-			}
-		}()
+
 		if err := session.Shell(); err != nil {
 			log.Fatal("failed to start shell: ", err)
 			execr.Status = StatusFailed
 			execr.RetrunCode = "1"
-			execr.Out = outbuf.String()
+			execr.Out = err.Error()
 		} else {
-			/*
-				go func(i io.Writer, o *bytes.Buffer) {
-					for {
-						if strings.Contains(string(output.Bytes()), "[sudo] password for ") {
-							_, err = in.Write([]byte(conn.password + "\n"))
-							if err != nil {
-								break
-							}
-							fmt.Println("put the password ---  end .")
-							break
-						}
-					}
-				}(stdi, stdo)
-			*/
-			//prepare cmd
 			commands = strings.TrimRight(commands, ";")
 			cmdlist := strings.Split(commands, ";")
 			for _, cmd := range cmdlist {
 				cmd = cmd + "\n"
-				//i <- cmd
+				//cmd = cmd + " 2>&1\n"
 				stdin.Write([]byte(cmd))
 			}
 			stdin.Write([]byte("exit\n"))
@@ -628,10 +594,29 @@ func Execute(client *ssh.Client, commands string, timeout int) ExecResult {
 					fmt.Println("2")
 				}
 			}
-			time.Sleep(1 * time.Second)
+			// trim output
+			trimOut := func(out io.Reader) string {
+				scanner := bufio.NewScanner(out)
+				ok := false
+				po := ""
+				for scanner.Scan() {
+					if ok {
+						po = fmt.Sprintf("%v%v\n", po, scanner.Text())
+					}
+					if scanner.Text() == "exit" {
+						ok = true
+					}
+				}
+				if scanner.Err() != nil {
+					fmt.Printf("trim output error: %s\n", scanner.Err())
+					return ""
+				}
+				return po
+			}
+			pureOut := trimOut(&outbuf)
 			execr.Status = StatusSuccess
 			execr.RetrunCode = "0"
-			execr.Out = outbuf.String()
+			execr.Out = pureOut + errbuf.String()
 		}
 	}
 	//send ExecResult
