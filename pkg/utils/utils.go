@@ -34,6 +34,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"gopkg.in/yaml.v2"
@@ -104,6 +105,102 @@ func SumInfo(sumr ResultSum) string {
 	}
 	sumi := fmt.Sprintf("\nEnd Time: %s\nCost Time: %s\nTotal(%d) : Success=%d    Failed=%d    Unreachable=%d    Skipped=%d\n", endTimeStr, costTimeStr, totalNum, successNum, failedNum, unreachableNum, skippedNum)
 	return sumi
+}
+
+//ColorSumInfo print result summary to standout with color
+func ColorPrintSumInfo(sumr ResultSum) {
+	sumr.EndTime = time.Now()
+	sumr.CostTime = sumr.EndTime.Sub(sumr.StartTime)
+	endTimeStr := sumr.EndTime.Format("2006-01-02 15:04:05")
+	costTimeStr := sumr.CostTime.String()
+	//totalNum := len(sumr.Failed) + len(sumr.Success) + len(sumr.Unreachable) + len(sumr.Skiped)
+	totalNum := len(sumr.NodeResult)
+	successNum := 0
+	failedNum := 0
+	unreachableNum := 0
+	timeoutNum := 0
+	skippedNum := 0
+	for _, r := range sumr.NodeResult {
+		if r.Result.Status == StatusSuccess {
+			successNum++
+		} else if r.Result.Status == StatusFailed {
+			failedNum++
+		} else if r.Result.Status == StatusUnreachable {
+			unreachableNum++
+		} else if r.Result.Status == StatusTimeout {
+			timeoutNum++
+		} else if r.Result.Status == StatusSkiped {
+			skippedNum++
+		}
+	}
+	fmt.Printf("\nEnd Time: %s\nCost Time: %s\n", endTimeStr, costTimeStr)
+	fmt.Printf("Total(%d) : ", totalNum)
+	if successNum > 0 {
+		fmt.Printf("%s%s    ", color.GreenString("Success="), color.GreenString(strconv.Itoa(successNum)))
+	} else {
+		fmt.Printf("%s%d    ", "Success=", successNum)
+	}
+	if failedNum > 0 {
+		fmt.Printf("%s%s    ", color.RedString("Failed="), color.RedString(strconv.Itoa(failedNum)))
+	} else {
+		fmt.Printf("%s%d    ", "Failed=", failedNum)
+	}
+	if unreachableNum > 0 {
+		fmt.Printf("%s%s    ", color.RedString("Unreachable="), color.RedString(strconv.Itoa(unreachableNum)))
+	} else {
+		fmt.Printf("%s%d    ", "Unreachable=", unreachableNum)
+	}
+	if timeoutNum > 0 {
+		fmt.Printf("%s%s    ", color.RedString("Timeout="), color.RedString(strconv.Itoa(timeoutNum)))
+	} else {
+		fmt.Printf("%s%d    ", "Timeout=", timeoutNum)
+	}
+	if skippedNum > 0 {
+		fmt.Printf("%s%s    ", color.CyanString("Skipped="), color.CyanString(strconv.Itoa(skippedNum)))
+	} else {
+		fmt.Printf("%s%d\n", "Skipped=", skippedNum)
+	}
+}
+
+//ColorPrintNodeResult print node result to standout with color
+func ColorPrintNodeResult(noder NodeResult, outputStyle string) {
+	colorPrint := func(status string, nrInfo string) {
+		switch status {
+		case StatusSuccess:
+			color.Green(nrInfo)
+		case StatusFailed:
+			color.Red(nrInfo)
+		case StatusUnreachable:
+			color.Red(nrInfo)
+		case StatusSkiped:
+			color.Cyan(nrInfo)
+		case StatusTimeout:
+			color.Yellow(nrInfo)
+		default:
+			color.Red("Unkonwn Exect Result Status")
+		}
+	}
+	switch outputStyle {
+	case "gansible":
+		nrInfo := NodeResultInfo(noder)
+		colorPrint(noder.Result.Status, nrInfo)
+	case "json":
+		nrInfo, err := json.Marshal(noder)
+		if err != nil {
+			fmt.Println("marshal node result error:", err)
+			return
+		}
+		colorPrint(noder.Result.Status, string(nrInfo))
+	case "yaml":
+		nrInfo, err := yaml.Marshal(noder)
+		if err != nil {
+			fmt.Println("marshal node result error:", err)
+			return
+		}
+		colorPrint(noder.Result.Status, string(nrInfo))
+	default:
+		color.Red("incorrect output format")
+	}
 }
 
 //PrintNodeResult print node result to standout

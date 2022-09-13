@@ -67,19 +67,18 @@ The most typical example:  gansible	run -c "cd /tmp &&  pwd;ls"  -n  "10.0.0.1;1
 				var client *ssh.Client
 				client, err = connect.DoSilent(keyPath, keyPassword, user, password, noder.Node, port, sshTimeout, sshThreads, pwdFile)
 				if err != nil {
-					noder.Result.Status = "Unreachable"
+					noder.Result.Status = utils.StatusUnreachable
 					noder.Result.RetrunCode = "1"
 					noder.Result.Out = err.Error()
-					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
-					fmt.Println(nrInfo)
+					utils.ColorPrintNodeResult(noder, outputStyle)
 					fmt.Printf("\n")
 				} else {
 					defer client.Close()
 					nodecmd := strings.Replace(commands, "GAN.NODE", noder.Node, -1)
 					noder.Result = utils.Execute(client, nodecmd, timeout)
 					result <- noder
-					utils.PrintNodeResult(noder, outputStyle)
+					utils.ColorPrintNodeResult(noder, outputStyle)
 				}
 			})
 			defer p.Release()
@@ -96,8 +95,7 @@ The most typical example:  gansible	run -c "cd /tmp &&  pwd;ls"  -n  "10.0.0.1;1
 			}
 			wg.Wait()
 		}
-		sumrinfo := utils.SumInfo(sumr)
-		fmt.Printf("%s", sumrinfo)
+		utils.ColorPrintSumInfo(sumr)
 		if loging {
 			utils.Loging(sumr, logFileName, logFileFormat, logDir)
 		}

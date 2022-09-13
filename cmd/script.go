@@ -67,21 +67,21 @@ The most typical example:  gansible script -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.
 				var client *ssh.Client
 				client, err = connect.DoSilent(keyPath, keyPassword, user, password, noder.Node, port, sshTimeout, sshThreads, pwdFile)
 				if err != nil {
-					noder.Result.Status = "Unreachable"
+					noder.Result.Status = utils.StatusUnreachable
 					noder.Result.RetrunCode = "1"
 					noder.Result.Out = err.Error()
 					result <- noder
-					utils.PrintNodeResult(noder, outputStyle)
+					utils.ColorPrintNodeResult(noder, outputStyle)
 				} else {
 					defer client.Close()
 					var sftpClient *sftp.Client
 					sftpClient, err = sftp.NewClient(client)
 					if err != nil {
-						noder.Result.Status = "Unreachable"
+						noder.Result.Status = utils.StatusUnreachable
 						noder.Result.RetrunCode = "1"
 						noder.Result.Out = err.Error()
 						result <- noder
-						utils.PrintNodeResult(noder, outputStyle)
+						utils.ColorPrintNodeResult(noder, outputStyle)
 					}
 					noder.Result = utils.Upload(sftpClient, scriptFile, "/tmp")
 					//tempDir := os.TempDir()
@@ -96,9 +96,8 @@ The most typical example:  gansible script -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.
 						cmd = "cd " + dir + ";" + cmd
 					}
 					noder.Result = utils.Execute(client, cmd, timeout)
-					nrInfo := utils.NodeResultInfo(noder)
 					result <- noder
-					fmt.Println(nrInfo)
+					utils.ColorPrintNodeResult(noder, outputStyle)
 				}
 			})
 			defer p.Release()
@@ -115,8 +114,7 @@ The most typical example:  gansible script -n  "10.0.0.1;10.0.0.3-5;10.0.0.7-10.
 			}
 			wg.Wait()
 		}
-		sumrinfo := utils.SumInfo(sumr)
-		fmt.Println(sumrinfo)
+		utils.ColorPrintSumInfo(sumr)
 		if loging {
 			utils.Loging(sumr, logFileName, logFileFormat, logDir)
 		}
